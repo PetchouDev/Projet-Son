@@ -1,9 +1,9 @@
 import pygame
-from ..config import *
+from config import *
 
 class Bullet:
     def __init__(self, x, y, speed=10):
-        self.image = pygame.image.load("assets/bullet.png")
+        self.image = pygame.image.load("voice-platformer/assets/bullet.png")
         self.x = x
         self.y = y
         self.width = 10
@@ -18,5 +18,5 @@ class Bullet:
     def draw(self, screen):
         screen.blit(self.image, (self.x, self.y))
 
-def generate_bullets(x, y):
+def generate_bullet(x, y):
     return Bullet(x, y)

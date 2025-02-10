@@ -1,10 +1,10 @@
 import pygame
 import random
-from ..config import *
+from config import *
 
 class Enemy:
     def __init__(self, x, y):
-        self.image = pygame.image.load("assets/enemy.png")
+        self.image = pygame.image.load("voice-platformer/assets/enemy.png")
         self.x = x
         self.y = y
         self.active = True

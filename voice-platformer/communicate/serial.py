@@ -1,6 +1,7 @@
 import serial
 import threading
-from ..config import *
+from config import *
+from queue import Queue
 
 class SerialSender:
     def __init__(self):

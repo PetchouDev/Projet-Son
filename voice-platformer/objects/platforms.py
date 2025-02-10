@@ -1,7 +1,6 @@
 import pygame
 import random
-import noise
-from ..config import *
+from config import *
 
 class Platform:
     def __init__(self, x, y, width=100, height=20):

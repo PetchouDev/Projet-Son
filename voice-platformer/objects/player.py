@@ -1,9 +1,9 @@
 import pygame
-from ..config import *
+from config import *
 
 class Player:
     def __init__(self, mode):
-        self.image = pygame.image.load("assets/player.png")
+        self.image = pygame.image.load("voice-platformer/assets/player.png")
         self.x = WIDTH // 4
         self.y = HEIGHT - 100
         self.width = 50
