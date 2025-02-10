@@ -13,9 +13,10 @@ PYTHON :
 1. Pygame création fenêtre
 2. Physique sol, personnages
     1. Mouvements généraux
-3. Pause, score
+3. Menu start, menu pause, score
     1. Distance parcourue +kills = score
     2. Pause = appui bouton
+    3. Switch mode women (menu pause ou start)
 4. Fonction de tir
     1. Barre de charge
     2. Balle (vitesse)
