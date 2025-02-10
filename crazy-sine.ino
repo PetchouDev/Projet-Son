@@ -1,5 +1,5 @@
 #include <Audio.h>
-#include "dsp.h"
+#include "MyDsp.h"
 
 MyDsp myDsp;
 AudioOutputI2S out;
