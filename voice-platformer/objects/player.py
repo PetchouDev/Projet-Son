@@ -14,7 +14,7 @@ class Player:
         self.alive = True
         self.divide = 5
         if mode:
-            self.mode += 1
+            self.divide += 1
 
     def change_mode(self, mode):
         self.divide = 5
