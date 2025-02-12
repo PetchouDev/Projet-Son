@@ -4,32 +4,57 @@ from config import *
 
 class Background:
     def __init__(self):
-        self.bg = pygame.image.load("voice-platformer/assets/background.png")
-        self.mountains = pygame.image.load("voice-platformer/assets/mountain.png")
-        self.clouds = pygame.image.load("voice-platformer/assets/cloud.png")
 
-        self.bg_y = 0
-        self.bg = pygame.transform.scale(self.bg, (WIDTH, HEIGHT))
-        self.clouds = pygame.transform.scale(self.clouds, (WIDTH // 6, HEIGHT // 6)) 
-        self.mountains = pygame.transform.scale(self.mountains, (WIDTH, HEIGHT // 3)) 
+        self.clouds = [elements(f"cloud{i+1}", (25, 150), 0.75) for i in range(7)]
+        self.backgrounds = [back_element(f"background{i+1}", i/6) for i in range(3)]
 
-        self.cloud_positions = [(random.randint(0, WIDTH), random.randint(50, 200)) for _ in range(5)]
-        self.mountain_positions = [(random.randint(0, WIDTH), 350) for _ in range(3)]
+    def update(self, screen, speed):
+        for background in self.backgrounds:
+            background.update(speed)
+            background.draw(screen)
+        for cloud in self.clouds:
+            cloud.update(speed)
+            cloud.draw(screen)
 
-    def update(self):
-        self.bg_y += 1
-        if self.bg_y >= HEIGHT:
-            self.bg_y = 0
+        
+class elements:
+    def __init__(self, image, y_scale=(50, 200), speed=1):
+        self.picture = pygame.image.load(f"voice-platformer/assets/{image}.png")
+        self.picture = pygame.transform.scale(self.picture, (WIDTH // 6, HEIGHT // 6))
+        self.position = [random.randint(WIDTH, WIDTH*2), random.randint(y_scale[0], y_scale[1])]
+        self.y_scale = y_scale
+        self.speed = speed
 
-        self.cloud_positions = [(x - 0.5 if x > -WIDTH // 6 else WIDTH, y) for x, y in self.cloud_positions]
-        self.mountain_positions = [(x - 1 if x > -WIDTH else WIDTH, y) for x, y in self.mountain_positions]
+    def update(self, speed):
+        if self.position[0] > -WIDTH:
+            self.position[0] -= self.speed*speed
+        else:
+            self.position = self.respawn()
 
     def draw(self, screen):
-        screen.blit(self.bg, (0, self.bg_y))
-        screen.blit(self.bg, (0, self.bg_y - HEIGHT))
-        
-        for x, y in self.cloud_positions:
-            screen.blit(self.clouds, (x, y))
-        
-        for x, y in self.mountain_positions:
-            screen.blit(self.mountains, (x, y))
+        screen.blit(self.picture, tuple(self.position))
+
+    def respawn(self):
+        return [random.randint(WIDTH, WIDTH*2), random.randint(self.y_scale[0], self.y_scale[1])]
+
+class back_element:
+    def __init__(self, image, speed=0.5):
+        self.picture = pygame.image.load(f"voice-platformer/assets/{image}.png")
+        self.picture = pygame.transform.scale(self.picture, (WIDTH, HEIGHT))
+        self.position = [0, 0]
+        self.speed = speed
+
+    def update(self, speed):
+        amount = self.speed* speed
+        if self.position[0] > -WIDTH:
+            self.position[0] -= amount
+        else:
+            self.position = [self.position[0]+WIDTH-amount, 0]
+    
+    def respawn(self):
+        return [WIDTH, 0]
+    
+    def draw(self, screen):
+        screen.blit(self.picture, tuple(self.position))
+        screen.blit(self.picture, (self.position[0] + WIDTH, self.position[1]))
+    

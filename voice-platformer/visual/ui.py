@@ -32,10 +32,10 @@ class UI:
         return lines
     
     def draw_start_menu(self, screen):
-        self.draw_text(screen, "Appuyez sur Start (Teensy) pour jouer", WHITE)
+        self.draw_text(screen, "SHOUT 2 PLAY", WHITE)
     
     def draw_pause_menu(self, screen):
-        self.draw_text(screen, "PAUSE - Appuyez sur Start pour reprendre", WHITE)
+        self.draw_text(screen, "PAUSE - Criez pour reprendre", WHITE)
     
     def draw_game_over(self, screen, score):
         self.draw_text(screen, f"GAME OVER - Score: {score}", RED)

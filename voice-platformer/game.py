@@ -22,6 +22,7 @@ def game_loop():
     platforms = generate_platforms(5)
     enemies = []
     bullets = []
+    speed = 10
     background = Background()
     ui = UI()
     pause = Pause()
@@ -32,14 +33,14 @@ def game_loop():
     enemy_spawn_timer = 0
 
     while running:
+        #speed += 0.01
         data = serial_reader.get_data()
         gain = data["gain"]
         frequency = data["frequency"]
         button_pressed = data["button_pressed"]
         potentiometer_value = data["potentiometer_value"]
         screen.fill((0, 0, 0))
-        background.update()
-        background.draw(screen)
+        background.update(screen, speed)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
