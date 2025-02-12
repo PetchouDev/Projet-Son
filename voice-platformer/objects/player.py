@@ -1,9 +1,17 @@
 import pygame
 from config import *
 
+from core.utils import get_image
+
 class Player:
-    def __init__(self, mode):
-        self.image = pygame.image.load("voice-platformer/assets/player.png")
+    def __init__(self, mode=0):
+        self.sprite_sheet = pygame.image.load("voice-platformer/assets/ducky_player.png")
+        self.sprite_size = (32, 32)
+        self.display_size = (50, 50)
+        self.image = get_image(self, 0, 0, self.display_size[0])
+
+
+
         self.x = WIDTH // 4
         self.y = HEIGHT - 100
         self.width = 50
@@ -14,7 +22,7 @@ class Player:
         self.alive = True
         self.divide = 5
         if mode:
-            self.mode += 1
+            self.divide += 1
 
     def change_mode(self, mode):
         self.divide = 5

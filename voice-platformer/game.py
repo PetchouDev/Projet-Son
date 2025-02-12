@@ -169,6 +169,8 @@ class Game:
             self.update()
             self.draw()
             self.clock.tick(FPS)
+
+        input("Appuyez sur Entrée pour quitter...")
         pygame.quit()
 
 
