@@ -19,7 +19,8 @@ class MyDsp : public AudioStream
     
   private:
     Sine sine;
-    Echo echo;
+    Echo echoL;
+    Echo echoR;
 };
 
 #endif
