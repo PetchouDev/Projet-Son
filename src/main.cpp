@@ -14,6 +14,9 @@ void setup() {
 }
 
 void loop() {
-  myDsp.setFreq(random(50,1000));
+ // myDsp.setFreq(random(50,1000));
+ // delay(100);
+  int sensorValue = analogRead(A0);
+  Serial.println(sensorValue);
   delay(100);
 }
