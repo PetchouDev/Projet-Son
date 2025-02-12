@@ -7,6 +7,8 @@ AudioControlSGTL5000 audioShield;
 AudioConnection patchCord0(myDsp,0,out,0);
 AudioConnection patchCord1(myDsp,1,out,1);
 
+bool button_pressed = false;
+
 void setup() {
   AudioMemory(2);
   audioShield.enable();
@@ -14,9 +16,15 @@ void setup() {
 }
 
 void loop() {
- // myDsp.setFreq(random(50,1000));
+
+  if(digitalRead(0) == 1 and button_pressed == false){
+    button_pressed = true;
+    myDsp.setGain();
+  }
+  if(digitalRead(0) == 0 and button_pressed == true){
+    button_pressed = false;
+  }
+  
  // delay(100);
-  int sensorValue = analogRead(A0);
-  Serial.println(sensorValue);
   delay(100);
 }

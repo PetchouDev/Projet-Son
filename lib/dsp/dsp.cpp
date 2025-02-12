@@ -8,12 +8,12 @@ MyDsp::MyDsp() :
 AudioStream(AUDIO_OUTPUTS, new audio_block_t*[AUDIO_OUTPUTS]),
 sine(AUDIO_SAMPLE_RATE_EXACT),
 echoL(AUDIO_SAMPLE_RATE_EXACT,10000),
-echoR(AUDIO_SAMPLE_RATE_EXACT,10000)
+echoR(AUDIO_SAMPLE_RATE_EXACT,8000)
 {
   echoL.setDel(10000);
   echoL.setFeedback(0.5);
-  echoR.setDel(10000);
-  echoR.setFeedback(0.5);
+  echoR.setDel(8000);
+  echoR.setFeedback(0.2);
 }
 
 MyDsp::~MyDsp(){}
@@ -22,6 +22,10 @@ MyDsp::~MyDsp(){}
 void MyDsp::setFreq(float freq){
   sine.setFrequency(freq);
 }
+void MyDsp::setGain(){
+    setFreq(random(100,1400));
+}
+
 
 void MyDsp::update(void) {
   audio_block_t* outBlock[AUDIO_OUTPUTS];
@@ -31,21 +35,23 @@ void MyDsp::update(void) {
       for (int i = 0; i < AUDIO_BLOCK_SAMPLES; i++) {
         
         if(channel==0){
-          float currentSample = echoL.tick(sine.tick())*0.5;
+          float currentSample = echoL.tick(sine.tick())*gain;
         currentSample = max(-1,min(1,currentSample));
         int16_t val = currentSample*MULT_16;
         outBlock[channel]->data[i] = val;
           echoL.setFeedback(0.5);
         }else{
-          float currentSample = echoR.tick(sine.tick())*0.1;
+          float currentSample = echoR.tick(sine.tick())*gain;
         currentSample = max(-1,min(1,currentSample));
         int16_t val = currentSample*MULT_16;
         outBlock[channel]->data[i] = val;
           echoR.setFeedback(0.2);
         }
       }
-      transmit(outBlock[channel], channel);
-      release(outBlock[channel]);
     }
+  }
+  for (int channel = 0; channel < AUDIO_OUTPUTS; channel++) {
+    transmit(outBlock[channel], channel);
+      release(outBlock[channel]);
   }
 }
