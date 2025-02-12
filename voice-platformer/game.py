@@ -75,7 +75,8 @@ class Game:
     def update(self):
         """Mise à jour des objets du jeu"""
         if not self.game_started:
-            self.background.update(screen, self.speed)
+            self.background.update(self.screen, self.speed)
+            self.player.draw(self.screen, self.speed)
             return  # Ne rien mettre à jour si le jeu n'a pas commencé
 
         if not self.paused:
@@ -168,9 +169,9 @@ class Game:
             self.handle_events(button_pressed_1, button_pressed_2)
             self.update()
             self.draw()
+            self.speed *= 1.01  # Augmenter la vitesse du jeu
             self.clock.tick(FPS)
 
-        input("Appuyez sur Entrée pour quitter...")
         pygame.quit()
 
 
