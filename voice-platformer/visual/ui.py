@@ -3,11 +3,11 @@ from config import *
 
 class UI:
     def __init__(self, font_path="voice-platformer/assets/font.otf"):
-        self.font = pygame.font.Font(font_path, 36)
+        self.font = pygame.font.Font(font_path, 40)
 
     def draw_text(self, screen, text, color, y_offset=0):
         lines = self.split_text(text, screen.get_width() - 40)  # Ajuste la largeur max
-        y = HEIGHT // 2 + y_offset - (len(lines) * self.font.get_height()) // 2
+        y = HEIGHT * 0.4 + y_offset - (len(lines) * self.font.get_height()) // 2
         for line in lines:
             rendered_text = self.font.render(line, True, color)
             screen.blit(rendered_text, (WIDTH // 2 - rendered_text.get_width() // 2, y))
