@@ -52,7 +52,7 @@ class Game:
     def handle_events(self, button_pressed_1, button_pressed_2):
         """Gestion des événements clavier et souris"""
         if button_pressed_1 and time() - self.button_wait_1 > 0.5:
-            self.player.change_mode(not self.player.mode)
+            self.player.change_mode(not self.player.divide)
             self.button_wait_2 = time()
         if button_pressed_2 and time() - self.button_wait_2 > 0.5:
             self.pause = not self.pause
