@@ -38,7 +38,8 @@ class SerialReader:
         self.running = True
         self.gain = 0
         self.frequency = 0
-        self.button_pressed = False
+        self.button_pressed_1 = False
+        self.button_pressed_2 = False
         self.potentiometer_value = 0
 
         # Démarrer le thread de lecture en arrière-plan
@@ -68,7 +69,8 @@ class SerialReader:
         switch = {
             "gain": self.set_gain,
             "frequency": self.set_frequency,
-            "button": self.set_button,
+            "button_1": self.set_button_1,
+            "button_2": self.set_button_2,
             "potentiometer": self.set_potentiometer
         }
         # Appel de la fonction associée à l'identifiant
@@ -93,11 +95,18 @@ class SerialReader:
         except ValueError:
             print(f"Erreur de conversion pour Frequency : {value}")
 
-    def set_button(self, value):
+    def set_button_1(self, value):
         """Met à jour l'état du bouton (True ou False) selon la valeur reçue."""
         try:
-            self.button_pressed = bool(int(value))
-            print(f"État du bouton : {self.button_pressed}")
+            self.button_pressed_1 = bool(int(value))
+            print(f"État du bouton : {self.button_pressed_1}")
+        except ValueError:
+            print(f"Erreur de conversion pour Button : {value}")
+
+    def set_button_2(self, value):
+        try:
+            self.button_pressed_2 = bool(int(value))
+            print(f"État du bouton : {self.button_pressed_2}")
         except ValueError:
             print(f"Erreur de conversion pour Button : {value}")
 
@@ -114,6 +123,7 @@ class SerialReader:
         return {
             "gain": self.gain,
             "frequency": self.frequency,
-            "button_pressed": self.button_pressed,
+            "button_pressed_1": self.button_pressed_1,
+            "button_pressed_2": self.button_pressed_2,
             "potentiometer_value": self.potentiometer_value
         }
