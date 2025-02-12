@@ -1,7 +1,12 @@
-# --- Configurations générales ---
-WIDTH, HEIGHT = 800, 600
-FPS = 30
+import pygame
+pygame.init()
+pygame.display.Info()
 
+# --- Configurations générales ---
+infoObject = pygame.display.Info()
+WIDTH, HEIGHT = infoObject.current_w, infoObject.current_h
+FPS = 30
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
 # --- Paramètres de physique ---
 GRAVITY = 0.5
 JUMP_FACTOR = 5

@@ -12,8 +12,6 @@ from menus.pause import Pause
 from menus.score import Score
 
 def game_loop():
-    pygame.init()
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("Voice-Controlled Platformer")
     clock = pygame.time.Clock()
     serial_reader = SerialReader()
