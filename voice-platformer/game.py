@@ -2,7 +2,7 @@ import pygame
 from time import time
 from config import *
 from objects.player import Player
-from objects.platforms import generate_platforms
+from objects.platforms import Platform, generate_platforms
 from objects.bullets import Bullet, generate_bullet
 from objects.enemies import Enemy, generate_enemy
 from communicate.serial import SerialReader, SerialSender
@@ -49,6 +49,10 @@ class Game:
         self.button_wait_1 = 0
         self.button_wait_2 = 0
 
+
+        # Plateforme de départ
+        self.test_platform = Platform(-100, HEIGHT - 100, 16)
+
     def handle_events(self, button_pressed_1, button_pressed_2):
         """Gestion des événements clavier et souris"""
         if button_pressed_1 and time() - self.button_wait_1 > 0.5:
@@ -77,6 +81,7 @@ class Game:
         if not self.game_started:
             self.background.update(self.screen, self.speed)
             self.player.draw(self.screen, self.speed)
+            self.test_platform.draw(self.screen)
             return  # Ne rien mettre à jour si le jeu n'a pas commencé
 
         if not self.paused:

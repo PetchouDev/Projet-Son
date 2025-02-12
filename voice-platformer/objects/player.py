@@ -7,15 +7,16 @@ from core.utils import get_image
 class Player:
     def __init__(self, mode=0):
         self.sprite_sheet = pygame.image.load("voice-platformer/assets/ducky_player.png")
-        self.sprite_size = (32, 32)
-        self.display_size = (100, 100)
+        self.sprite_sheet = pygame.transform.scale(self.sprite_sheet, (self.sprite_sheet.get_width() * 2, self.sprite_sheet.get_height() * 2))
+        self.sprite_size = (64, 64)
+        self.display_size = (192, 192)
         self.images = [get_image(self, col, 1, self.display_size[0]) for col in range(6)]
         self.animate_delay = 0.1
         self.animate_timer = 0
         self.animate_index = 0
 
         self.x = WIDTH // 4
-        self.y = HEIGHT - 100
+        self.y = HEIGHT - 100 - self.display_size[1]
         self.width = 50
         self.height = 50
         self.y_velocity = 0
@@ -53,4 +54,4 @@ class Player:
             self.animate_index = (self.animate_index + 1) % len(self.images)
         image = self.images[self.animate_index]
 
-        screen.blit(image, (self.x, self.y))
+        screen.blit(image, (self.x, self.y + 6))
