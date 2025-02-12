@@ -16,7 +16,7 @@ def get_image(self, col:int, row:int, resize:Optional[int]=None) -> pygame.Surfa
 
     """
     x,y = self.sprite_size
-    image = pygame.Surface((x, y))
+    image = pygame.Surface((x, y), pygame.SRCALPHA)
     image.blit(self.sprite_sheet, (0, 0), (col*x, row*y, x, y))
 
     if resize:
@@ -24,6 +24,6 @@ def get_image(self, col:int, row:int, resize:Optional[int]=None) -> pygame.Surfa
         coef = resize / x
         image = pygame.transform.rotozoom(image, 0, coef)
 
-    image.set_colorkey((0, 0, 0))  
+    #image.set_colorkey((25, 10, 10))  
 
     return image
