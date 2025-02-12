@@ -1,9 +1,19 @@
+import time
 import pygame
 from config import *
 
+from core.utils import get_image
+
 class Player:
-    def __init__(self, mode):
-        self.image = pygame.image.load("voice-platformer/assets/player.png")
+    def __init__(self, mode=0):
+        self.sprite_sheet = pygame.image.load("voice-platformer/assets/ducky_player.png")
+        self.sprite_size = (32, 32)
+        self.display_size = (100, 100)
+        self.images = [get_image(self, col, 1, self.display_size[0]) for col in range(6)]
+        self.animate_delay = 0.1
+        self.animate_timer = 0
+        self.animate_index = 0
+
         self.x = WIDTH // 4
         self.y = HEIGHT - 100
         self.width = 50
@@ -36,5 +46,11 @@ class Player:
             self.y_velocity = 0
             self.max_gain = 0
 
-    def draw(self, screen):
-        screen.blit(self.image, (self.x, self.y))
+    def draw(self, screen, game_speed=1):
+        self.animate_timer += 1 / FPS
+        if self.animate_timer >= self.animate_delay * 8 / game_speed:
+            self.animate_timer = 0
+            self.animate_index = (self.animate_index + 1) % len(self.images)
+        image = self.images[self.animate_index]
+
+        screen.blit(image, (self.x, self.y))
