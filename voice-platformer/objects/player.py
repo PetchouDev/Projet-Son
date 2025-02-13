@@ -78,6 +78,7 @@ class Player:
         for platform in platforms:
             if self.y <= self.y+vector:
                 if self.y + self.display_size[1] == platform.y or self.y < platform.y-TILE_SIZE/2-self.display_size[1] < self.y+vector:
+                    print("plateforme traversée")
                     min_x = platform.x-4
                     max_x = platform.x+platform.width*TILE_SIZE+2
                     if min_x < self.x < max_x:
