@@ -1,7 +1,7 @@
 import time
 import pygame
 from config import *
-
+from math import sqrt
 from core.utils import get_image
 
 class Player:
@@ -17,16 +17,13 @@ class Player:
 
         self.x = WIDTH // 4
         self.y = HEIGHT - 100 - self.display_size[1]
-        self.width = 50
-        self.height = 50
+
         self.velocity_y = 0
-        self.objective = self.y
-        self.monte = False
-        self.was_on_ground = 1
         self.max_gain = 0
         self.loading = 0
         self.alive = True
         self.divide = 6
+        #self.jump = 0
         if mode:
             self.divide += 1
 
@@ -35,35 +32,43 @@ class Player:
         if mode:
             self.divide += 1
 
-    def update(self, loading_bullet, jump_power, platforms, game):
+    def update(self, loading_bullet, jump_power, platforms, game_speed):
         if jump_power > THRESHOLD:
             self.loading += loading_bullet / self.divide
+            self.loading = max(300, self.loading)
             if jump_power > self.max_gain:  # Seulement si la nouvelle puissance est plus forte
                 if not self.alive:
-                    jump_power = 10
+                    jump_power = SPAWN_JUMP
                     self.alive = True
-                self.velocity_y = -(jump_power - self.max_gain) * JUMP_FACTOR  # Applique la force du saut
+                    self.velocity_y = 0
+                    self.y = HEIGHT
+                    self.loading = 0
+                    self.max_gain = 0
+                    #self.jump = 0
+                #if self.jump == 0:
+                #    self.velocity_y = -(jump_power - self.max_gain) * JUMP_FACTOR * (1+self.max_gain/10)  # Applique la force du saut
+                #else:
+                #    self.velocity_y = -(jump_power - self.max_gain) * JUMP_FACTOR * (1+self.max_gain/10)
+                self.velocity_y = -(jump_power - self.max_gain) * JUMP_FACTOR * (1+self.max_gain/10)
+                #self.jump +=1
                 self.max_gain = jump_power  # Mémorise la puissance du saut
-                self.monte = True  # Indique qu'on est en l'air
-                self.was_on_ground = False
         
         # Appliquer la gravité si en l'air
-        vector = max(min(self.velocity_y, game_speed*50), -game_speed*50) * game_speed
+        temp = max(min(self.velocity_y, GRAVITY*20), -GRAVITY*20)
+        vector = temp * sqrt(sqrt(game_speed))
         final_pos = False #on ne traverse pas de plateforme
-        if not self.monte: #descendre
+        if vector >= 0.0: #descendre
             final_pos = self.ground(platforms, vector)
         if not final_pos: #pas de plateforme traversée
-                self.y += vector
-                self.max_gain *=0.995  # Réduit la puissance max
-                self.velocity_y += 6*GRAVITY  # Ajouter une constante de gravité
-                if self.velocity_y > 0:
-                    self.monte = False
+                self.y = max(self.y + vector, -self.display_size[1]/2)
+                self.max_gain *=0.98  # Réduit la puissance max
+                self.velocity_y += GRAVITY  # Ajouter une constante de gravité
         else: #plateforme traversée
-            self.was_on_ground = True
             self.y = final_pos - self.display_size[1]
             self.velocity_y = 0  # Arrêter tout mouvement vertical
             self.max_gain = 0  # Réinitialiser le gain pour un nouveau saut
-
+            self.jump_power = 0
+            #self.jump = 0
 
     def draw(self, screen, game_speed=1):
         if game_speed>0:
@@ -74,14 +79,16 @@ class Player:
         image = self.images[self.animate_index]
         screen.blit(image, (self.x, self.y + 8))
 
-    def ground(self, platforms):
+    def ground(self, platforms, vector):
         for platform in platforms:
-            if self.y <= self.y+vector:
-                if self.y + self.display_size[1] == platform.y or self.y < platform.y-TILE_SIZE/2-self.display_size[1] < self.y+vector:
-                    min_x = platform.x-4
-                    max_x = platform.x+platform.width*TILE_SIZE+2
-                    if min_x < self.x < max_x:
-                        return platform.y
-                    elif min_x < self.x+self.display_size[0]*1.5 < max_x:    
-                        return platform.y
+            print("====\nPlatform: ", platform.id)
+            min_x = platform.x-4
+            max_x = platform.x+platform.size+4
+            print(platform.id, min_x, max_x, self.x, self.x+self.display_size[0])
+            if self.x + self.display_size[0] > min_x and self.x < max_x:
+                print("Good X")
+                after = self.y + vector
+                if self.y == platform.y - self.display_size[1] or (self.y + self.display_size[1] <= platform.y and after + self.display_size[1] >= platform.y):
+                    print("On platform")
+                    return platform.y
         return None

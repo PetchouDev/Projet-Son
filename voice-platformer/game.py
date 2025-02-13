@@ -33,9 +33,11 @@ class Game:
         self.mode = False
         self.enemies = []
         self.player = Player(self.mode)
+        
+        self.speed = SCROLL_SPEED
         self.platforms = [Platform(-100, HEIGHT - 100, WIDTH//TILE_SIZE+2)]
         for i in range(9):
-            platform = generate_platforms(self.platforms[-1])
+            platform = generate_platforms(self.platforms[-1], self.speed)
             self.platforms.append(platform)
             if len(self.enemies) < 5:
                 if platform.width > 1:
@@ -47,7 +49,6 @@ class Game:
 
         # Autres paramètres
         self.enemy_spawn_timer = 0
-        self.speed = SCROLL_SPEED
         self.volume = 0
         self.power_jump = 0
         self.power_charge = 0
@@ -89,28 +90,28 @@ class Game:
 
         if not self.paused and self.game_started:
             self.speed += 0.015
-            self.player.update(self.power_charge, self.power_jump, self.platforms, self)
+            self.player.update(self.power_charge, self.power_jump, self.platforms, self.speed)
             self.power_jump = 0
             self.background.update(self.screen, self.speed)
             self.player.draw(self.screen, self.speed)
             if self.player.y > HEIGHT*1.3:
                 self.game_started = False
+                self.player.alive = False
                 self.score = 0
-                self.player.x = WIDTH // 4
                 self.enemies = []
                 self.bullets = []
                 self.speed = SCROLL_SPEED
-                self.platforms = [Platform(-100, HEIGHT - 100, WIDTH//TILE_SIZE+2)]
+                self.platforms = [Platform(-TILE_SIZE*3, HEIGHT - 100, WIDTH//TILE_SIZE+2)]
                 self.loose = 1
                 for i in range(9):
-                    self.platforms.append(generate_platforms(self.platforms[-1]))
+                    self.platforms.append(generate_platforms(self.platforms[-1], self.speed))
             # Mise à jour des plateformes
             for platform in self.platforms:
                 platform.update(self.speed)
                 platform.draw(self.screen)
-                if platform.x+platform.width*TILE_SIZE < -WIDTH:
+                if platform.x+platform.size < -WIDTH:
                     self.platforms.remove(platform)
-                    new_platform = generate_platforms(self.platforms[-1])
+                    new_platform = generate_platforms(self.platforms[-1], self.speed)
                     self.platforms.append(new_platform)
                     if len(self.enemies) < 5:
                         if new_platform.width > 1:
