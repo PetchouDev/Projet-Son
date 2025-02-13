@@ -28,6 +28,7 @@ class Player:
             self.divide += 1
 
         self.jump_factor = 1
+        self.is_jumping = False
 
     def change_mode(self, mode):
         self.divide = 6
@@ -35,10 +36,14 @@ class Player:
             self.divide += 1
 
     def update(self, loading_bullet, jump_power, platforms, game_speed):
+        if self.velocity_y < 0:  # Bloque la mise à jour de la puissance tant que le joueur monte
+            jump_power = self.max_gain
+
         if jump_power > THRESHOLD:
             self.loading += loading_bullet / self.divide
             self.loading = max(300, self.loading)
-            if jump_power > self.max_gain:  # Seulement si la nouvelle puissance est plus forte
+
+            if jump_power > self.max_gain and self.velocity_y >= 0:  # Seulement si le joueur ne monte plus
                 if not self.alive:
                     jump_power = SPAWN_JUMP
                     self.alive = True
@@ -46,32 +51,27 @@ class Player:
                     self.y = HEIGHT
                     self.loading = 0
                     self.max_gain = 0
-                    #self.jump = 0
-                #if self.jump == 0:
-                #    self.velocity_y = -(jump_power - self.max_gain) * JUMP_FACTOR * (1+self.max_gain/10)  # Applique la force du saut
-                #else:
-                #    self.velocity_y = -(jump_power - self.max_gain) * JUMP_FACTOR * (1+self.max_gain/10)
+
                 self.velocity_y = -(jump_power - self.max_gain) * JUMP_FACTOR * (1+self.max_gain/10) * self.jump_factor
-                self.jump_factor /= 1.5 # Réduit la puissance du prochain saut
-                #self.jump +=1
+                self.jump_factor /= 1.5  # Réduit la puissance du prochain saut
                 self.max_gain = jump_power  # Mémorise la puissance du saut
-        
+
         # Appliquer la gravité si en l'air
         temp = max(min(self.velocity_y, GRAVITY*20), -GRAVITY*20)
         vector = temp * sqrt(sqrt(game_speed))
-        final_pos = False #on ne traverse pas de plateforme
-        if vector >= 0.0: #descendre
+        final_pos = False  # On ne traverse pas de plateforme
+        if vector >= 0.0:  # Descendre
             final_pos = self.ground(platforms, vector)
-        if not final_pos: #pas de plateforme traversée
-                self.y = max(self.y + vector, -self.display_size[1]/2)
-                self.max_gain *=0.98 # Réduit la puissance max
-                self.velocity_y += GRAVITY  # Ajouter une constante de gravité
-        else: #plateforme traversée
+        if not final_pos:  # Pas de plateforme traversée
+            self.y = max(self.y + vector, -self.display_size[1]/2)
+            self.max_gain *= 0.98  # Réduit la puissance max
+            self.velocity_y += GRAVITY  # Ajouter une constante de gravité
+        else:  # Plateforme traversée
             self.y = final_pos - self.display_size[1]
             self.velocity_y = 0  # Arrêter tout mouvement vertical
             self.max_gain = 0  # Réinitialiser le gain pour un nouveau saut
-            self.jump_power = 0
-            #self.jump = 0
+            self.jump_factor = 1  # Réinitialiser la puissance du saut
+
 
     def draw(self, screen, game_speed=1):
         if game_speed>0:
