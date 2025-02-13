@@ -48,7 +48,7 @@ class Player:
                 self.was_on_ground = False
         
         # Appliquer la gravité si en l'air
-        vector = max(min(self.velocity_y, game_speed*50), -game_speed*50) * game_speed
+        vector = max(min(self.velocity_y, game.speed*50), -game.speed*50) * game.speed
         final_pos = False #on ne traverse pas de plateforme
         if not self.monte: #descendre
             final_pos = self.ground(platforms, vector)
@@ -74,7 +74,7 @@ class Player:
         image = self.images[self.animate_index]
         screen.blit(image, (self.x, self.y + 8))
 
-    def ground(self, platforms):
+    def ground(self, platforms, vector=None):
         for platform in platforms:
             if self.y <= self.y+vector:
                 if self.y + self.display_size[1] == platform.y or self.y < platform.y-TILE_SIZE/2-self.display_size[1] < self.y+vector:
