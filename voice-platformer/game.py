@@ -89,7 +89,7 @@ class Game:
 
         if not self.paused and self.game_started:
             self.speed += 0.015
-            self.player.update(self.power_charge, self.power_jump, self.platforms)
+            self.player.update(self.power_charge, self.power_jump, self.platforms, self)
             self.power_jump = 0
             self.background.update(self.screen, self.speed)
             self.player.draw(self.screen, self.speed)
@@ -136,10 +136,10 @@ class Game:
 
             self.ui.draw_score(self.screen, int((self.speed-SCROLL_SPEED)/2+self.kills*10))  # Afficher le score
         elif self.paused: 
-            self.player.update(0, 0, self.platforms)
+            self.player.update(0, 0, self.platforms, self)
             self.background.update(self.screen, 0)
 
-            self.player.draw(self.screen, 0)
+            self.player.draw(self.screen, self.speed)
             for platform in self.platforms:
                 platform.draw(self.screen)
             self.ui.draw_score(self.screen, self.score)  # Afficher le score

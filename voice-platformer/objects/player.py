@@ -35,7 +35,7 @@ class Player:
         if mode:
             self.divide += 1
 
-    def update(self, loading_bullet, jump_power, platforms, game_speed=1):
+    def update(self, loading_bullet, jump_power, platforms, game):
         if jump_power > THRESHOLD:
             self.loading += loading_bullet / self.divide
             if self.was_on_ground:
@@ -50,8 +50,8 @@ class Player:
         
         # Appliquer la gravité si en l'air
         if self.velocity_y != 0:
-            self.y += max(min(self.velocity_y, game_speed*50), -game_speed*50) * game_speed
-        final_pos = self.ground(platforms)
+            self.y += max(min(self.velocity_y, game.speed*50), -game.speed*50) * game.speed
+        final_pos = self.ground(platforms, game)
         if not final_pos or self.monte:
             self.max_gain *=0.995  # Réduit la puissance max
             self.velocity_y += 6*GRAVITY  # Ajouter une constante de gravité
@@ -73,7 +73,7 @@ class Player:
         image = self.images[self.animate_index]
         screen.blit(image, (self.x, self.y + 6))
 
-    def ground(self, platforms):
+    def ground(self, platforms, game):
         for platform in platforms:
             player_rect = pygame.Rect(self.x, self.y, self.display_size[0], self.display_size[1])
 
@@ -87,7 +87,7 @@ class Player:
                 if abs(player_rect.center[1] - (platform.y + 64)) < 80:
                     print("X collision")
                     print("m(X.X)m")
-                    input()
+                    self.game.speed= 0 
                     return None
                 # Collision sur l'axe Y
                 else:
