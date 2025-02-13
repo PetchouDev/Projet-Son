@@ -57,4 +57,4 @@ class back_element:
     def draw(self, screen):
         screen.blit(self.picture, tuple(self.position))
         screen.blit(self.picture, (self.position[0] + WIDTH, self.position[1]))
-    
+

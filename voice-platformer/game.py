@@ -9,7 +9,6 @@ from communicate.serial import SerialReader, SerialSender
 from visual.background import Background
 from visual.ui import UI
 from menus.pause import Pause
-from menus.score import Score
 
 # Initialisation de Pygame
 pygame.init()
@@ -27,17 +26,19 @@ class Game:
         self.running = True
         self.game_started = False
         self.paused = False
+        self.score = 0
 
         # Objets du jeu
-        self.mode = True
+        self.mode = False
         self.player = Player(self.mode)
-        self.platforms = generate_platforms(5)
+        self.platforms = [Platform(-100, HEIGHT - 100, WIDTH//TILE_SIZE+2)]
+        for i in range(9):
+            self.platforms.append(generate_platforms(self.platforms[-1]))
         self.enemies = []
         self.bullets = []
         self.background = Background()
         self.ui = UI()
         self.pause = Pause()
-        self.score = Score()
 
         # Autres paramètres
         self.enemy_spawn_timer = 0
@@ -48,10 +49,6 @@ class Game:
 
         self.button_wait_1 = 0
         self.button_wait_2 = 0
-
-
-        # Plateforme de départ
-        self.test_platform = Platform(-100, HEIGHT - 100, 16)
 
     def handle_events(self, button_pressed_1, button_pressed_2):
         """Gestion des événements clavier et souris"""
@@ -74,34 +71,52 @@ class Game:
                     if self.game_started:
                         self.paused = not self.paused  # Pause ou reprise
 
-    def update(self):
+    def update_draw(self):
         """Mise à jour des objets du jeu"""
         if not self.game_started:
             self.background.update(self.screen, self.speed)
             self.player.draw(self.screen, self.speed)
-            self.test_platform.draw(self.screen)
-            return  # Ne rien mettre à jour si le jeu n'a pas commencé
+            self.platforms[0].update(self.speed)
+            self.platforms[0].spawn_platform()
+            self.platforms[0].draw(self.screen)
+            self.ui.draw_start_menu(self.screen)
 
-        if not self.paused:
-            self.player.update(self.power_charge, self.power_jump)
+        if not self.paused and self.game_started:
+            self.speed += 0.015
+            self.player.update(self.power_charge, self.power_jump, self.platforms)
+            self.power_jump = 0
             self.background.update(self.screen, self.speed)
-
+            self.player.draw(self.screen, self.speed)
+            if self.player.y > HEIGHT*1.05:
+                self.game_started = False
+                self.score = 0
+                self.player.x = WIDTH // 4
+                self.enemies = []
+                self.bullets = []
+                self.speed = SCROLL_SPEED
+                self.platforms = [Platform(-100, HEIGHT - 100, WIDTH//TILE_SIZE+2)]
+                for i in range(9):
+                    self.platforms.append(generate_platforms(self.platforms[-1]))
             # Mise à jour des plateformes
             for platform in self.platforms:
-                platform.y += SCROLL_SPEED
-                if platform.y > HEIGHT:
+                platform.update(self.speed)
+                platform.draw(self.screen)
+                if platform.x+platform.width*TILE_SIZE < -WIDTH:
                     self.platforms.remove(platform)
-                    self.platforms.append(generate_platforms(1)[0])
+                    self.platforms.append(generate_platforms(self.platforms[-1]))
 
+                    
             # Mise à jour des bullets
             for bullet in self.bullets:
                 bullet.update()
+                platform.draw(self.screen)
                 if not bullet.active:
                     self.bullets.remove(bullet)
 
             # Mise à jour des ennemis
             for enemy in self.enemies:
                 enemy.update()
+                enemy.draw(self.screen)
                 if not enemy.active:
                     self.enemies.remove(enemy)
 
@@ -111,47 +126,15 @@ class Game:
                 self.enemies.append(generate_enemy())
                 self.enemy_spawn_timer = 0
 
-            # Collisions
-            self.check_collisions()
-        else: 
-            self.player.update(0, 0, False)
+            self.ui.draw_score(self.screen, self.score)  # Afficher le score
+        elif self.paused: 
+            self.player.update(0, 0, self.platforms)
             self.background.update(self.screen, 0)
 
-    def check_collisions(self):
-        """Gérer les collisions entre le joueur, les ennemis et les bullets"""
-        for enemy in self.enemies:
-            if enemy.x < self.player.x < enemy.x + 40 and enemy.y < self.player.y < enemy.y + 40:
-                self.game_started = False  # Game Over
-
-            for bullet in self.bullets:
-                if enemy.x < bullet.x < enemy.x + 40 and enemy.y < bullet.y < enemy.y + 40:
-                    self.enemies.remove(enemy)
-                    self.bullets.remove(bullet)
-                    self.score.increase(10)
-
-        # Vérifier si le joueur tombe hors de l'écran
-        if self.player.y > HEIGHT:
-            self.game_started = False
-
-    def draw(self):
-        """Afficher les éléments graphiques"""
-
-        if not self.game_started:
-            self.ui.draw_start_menu(self.screen)  # Afficher l'écran de démarrage
-        else:
+            self.player.draw(self.screen, 0)
             for platform in self.platforms:
                 platform.draw(self.screen)
-            for bullet in self.bullets:
-                bullet.draw(self.screen)
-            for enemy in self.enemies:
-                enemy.draw(self.screen)
-
-            self.player.draw(self.screen)
-            self.score.draw(self.screen)
-
-            if self.paused:
-                self.pause.draw(self.screen)  # Afficher le menu pause
-
+            self.ui.draw_score(self.screen, self.score)  # Afficher le score
         pygame.display.flip()
 
     def run(self):
@@ -160,6 +143,11 @@ class Game:
 
             data = self.serial_reader.get_data()
             gain = data["gain"]
+            #activation barre espace
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_SPACE:
+                        gain = 10
             frequency = data["frequency"]
             button_pressed_1 = data["button_pressed_1"]
             button_pressed_2 = data["button_pressed_2"]
@@ -171,9 +159,7 @@ class Game:
                 self.power_charge = frequency
                 
             self.handle_events(button_pressed_1, button_pressed_2)
-            self.update()
-            self.draw()
-            self.speed += 0.05
+            self.update_draw()
             self.clock.tick(FPS)
 
         pygame.quit()

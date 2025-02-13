@@ -12,6 +12,15 @@ class UI:
             rendered_text = self.font.render(line, True, color)
             screen.blit(rendered_text, (WIDTH // 2 - rendered_text.get_width() // 2, y))
             y += self.font.get_height()
+    
+    def draw_score(self, screen, score, color=WHITE):
+        text = f"Score: {score}"
+        lines = self.split_text(text, screen.get_width() - 40)  # Ajuste la largeur max
+        y = HEIGHT * 0.05 - (len(lines) * self.font.get_height()) // 2
+        for line in lines:
+            rendered_text = self.font.render(line, True, color)
+            screen.blit(rendered_text, (WIDTH*0.1 - rendered_text.get_width() // 2, y))
+            y += self.font.get_height()
 
     def split_text(self, text, max_width):
         words = text.split(" ")
