@@ -35,7 +35,7 @@ class Player:
         if mode:
             self.divide += 1
 
-    def update(self, loading_bullet, jump_power, platforms, game_speed=1):
+    def update(self, loading_bullet, jump_power, platforms, game):
         if jump_power > THRESHOLD:
             self.loading += loading_bullet / self.divide
             if jump_power > self.max_gain:  # Seulement si la nouvelle puissance est plus forte
@@ -74,11 +74,10 @@ class Player:
         image = self.images[self.animate_index]
         screen.blit(image, (self.x, self.y + 8))
 
-    def ground(self, platforms, vector):
+    def ground(self, platforms):
         for platform in platforms:
             if self.y <= self.y+vector:
                 if self.y + self.display_size[1] == platform.y or self.y < platform.y-TILE_SIZE/2-self.display_size[1] < self.y+vector:
-                    print("plateforme traversée")
                     min_x = platform.x-4
                     max_x = platform.x+platform.width*TILE_SIZE+2
                     if min_x < self.x < max_x:
