@@ -8,7 +8,7 @@ FPS = 30
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
 # --- Paramètres de physique ---
-GRAVITY = 1
+GRAVITY = 1.2
 JUMP_FACTOR = 2
 
 SPAWN_JUMP= GRAVITY*JUMP_FACTOR*5
