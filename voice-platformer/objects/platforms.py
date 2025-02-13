@@ -38,9 +38,9 @@ class Platform:
 
 def generate_platforms(before):
     min_x = before.x+(before.width+2)*TILE_SIZE
-    x = random.randint(int(min_x), int(min_x+TILE_SIZE*5))
-    y_borne1 = int(max(TILE_SIZE*2, before.y-TILE_SIZE*4))
-    y_borne2 = int(min(HEIGHT-TILE_SIZE*1, before.y+TILE_SIZE*4))
+    x = random.randint(int(min_x), int(min_x+TILE_SIZE*4.5))
+    y_borne1 = int(max(TILE_SIZE*2, before.y-TILE_SIZE*3))
+    y_borne2 = int(min(HEIGHT-TILE_SIZE*1, before.y+TILE_SIZE*3))
     if y_borne1 > y_borne2:
         y = random.randint(y_borne2, y_borne1)
     else:

@@ -38,26 +38,27 @@ class Player:
     def update(self, loading_bullet, jump_power, platforms, game_speed=1):
         if jump_power > THRESHOLD:
             self.loading += loading_bullet / self.divide
-            if self.was_on_ground:
-                jump_power *= 0.7
             if jump_power > self.max_gain:  # Seulement si la nouvelle puissance est plus forte
-                if self.was_on_ground:
-                    jump_power *= 1.2
-                self.velocity_y = -(jump_power - self.max_gain) * JUMP_FACTOR*3  # Applique la force du saut
+                if not self.alive:
+                    jump_power = 10
+                    self.alive = True
+                self.velocity_y = -(jump_power - self.max_gain) * JUMP_FACTOR  # Applique la force du saut
                 self.max_gain = jump_power  # Mémorise la puissance du saut
                 self.monte = True  # Indique qu'on est en l'air
                 self.was_on_ground = False
         
         # Appliquer la gravité si en l'air
-        if self.velocity_y != 0:
-            self.y += max(min(self.velocity_y, game_speed*50), -game_speed*50) * game_speed
-        final_pos = self.ground(platforms)
-        if not final_pos or self.monte:
-            self.max_gain *=0.995  # Réduit la puissance max
-            self.velocity_y += 6*GRAVITY  # Ajouter une constante de gravité
-            if self.velocity_y > 0:
-                self.monte = False
-        else:
+        vector = max(min(self.velocity_y, game_speed*50), -game_speed*50) * game_speed
+        final_pos = False #on ne traverse pas de plateforme
+        if not self.monte: #descendre
+            final_pos = self.ground(platforms, vector)
+        if not final_pos: #pas de plateforme traversée
+                self.y += vector
+                self.max_gain *=0.995  # Réduit la puissance max
+                self.velocity_y += 6*GRAVITY  # Ajouter une constante de gravité
+                if self.velocity_y > 0:
+                    self.monte = False
+        else: #plateforme traversée
             self.was_on_ground = True
             self.y = final_pos - self.display_size[1]
             self.velocity_y = 0  # Arrêter tout mouvement vertical
@@ -71,26 +72,16 @@ class Player:
                 self.animate_timer = 0
                 self.animate_index = (self.animate_index + 1) % len(self.images)
         image = self.images[self.animate_index]
-        screen.blit(image, (self.x, self.y + 6))
+        screen.blit(image, (self.x, self.y + 8))
 
-    def ground(self, platforms):
+    def ground(self, platforms, vector):
         for platform in platforms:
-            player_rect = pygame.Rect(self.x, self.y, self.display_size[0], self.display_size[1])
-
-            # Collision avec une plateforme
-            if player_rect.colliderect(platform.x+TILE_SIZE/2, platform.y, (platform.width) * TILE_SIZE, TILE_SIZE):   
-                
-                print("collide")
-                print(player_rect.center[1], platform.y + 64)
-
-                # Collision sur l'axe X 
-                if abs(player_rect.center[1] - (platform.y + 64)) < 80:
-                    print("X collision")
-                    print("m(X.X)m")
-                    input()
-                    return None
-                # Collision sur l'axe Y
-                else:
-                    print("Y collision")
-                    return platform.y
+            if self.y <= self.y+vector:
+                if self.y + self.display_size[1] == platform.y or self.y < platform.y-TILE_SIZE/2-self.display_size[1] < self.y+vector:
+                    min_x = platform.x-4
+                    max_x = platform.x+platform.width*TILE_SIZE+2
+                    if min_x < self.x < max_x:
+                        return platform.y
+                    elif min_x < self.x+self.display_size[0]*1.5 < max_x:    
+                        return platform.y
         return None
