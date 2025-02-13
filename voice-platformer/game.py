@@ -93,7 +93,7 @@ class Game:
             self.power_jump = 0
             self.background.update(self.screen, self.speed)
             self.player.draw(self.screen, self.speed)
-            if self.player.y > HEIGHT*1.1:
+            if self.player.y > HEIGHT*1.3:
                 self.game_started = False
                 self.score = 0
                 self.player.x = WIDTH // 4
@@ -101,7 +101,7 @@ class Game:
                 self.bullets = []
                 self.speed = SCROLL_SPEED
                 self.platforms = [Platform(-100, HEIGHT - 100, WIDTH//TILE_SIZE+2)]
-                self.loose += 1
+                self.loose = 1
                 for i in range(9):
                     self.platforms.append(generate_platforms(self.platforms[-1]))
             # Mise à jour des plateformes
@@ -163,7 +163,7 @@ class Game:
             if gain >= THRESHOLD:
                 if not self.game_started:
                     self.game_started = True
-                    if self.loose > 0:
+                    if self.loose == 1:
                         gain = 20
                 self.power_jump = gain
                 self.power_charge = frequency

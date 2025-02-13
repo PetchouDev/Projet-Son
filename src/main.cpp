@@ -17,13 +17,8 @@ void setup() {
 
 void loop() {
 
-  if(digitalRead(0) == 1 and button_pressed == false){
-    button_pressed = true;
-    myDsp.setGain();
-  }
-  if(digitalRead(0) == 0 and button_pressed == true){
-    button_pressed = false;
-  }
+  myDsp.setFreq(random(70,500));
+  delay(100);
   
  // delay(100);
   delay(100);
