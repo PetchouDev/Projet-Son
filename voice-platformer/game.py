@@ -27,6 +27,7 @@ class Game:
         self.game_started = False
         self.paused = False
         self.score = 0
+        self.kills = 0
 
         # Objets du jeu
         self.mode = False
@@ -46,6 +47,7 @@ class Game:
         self.volume = 0
         self.power_jump = 0
         self.power_charge = 0
+        self.loose = 0
 
         self.button_wait_1 = 0
         self.button_wait_2 = 0
@@ -87,7 +89,7 @@ class Game:
             self.power_jump = 0
             self.background.update(self.screen, self.speed)
             self.player.draw(self.screen, self.speed)
-            if self.player.y > HEIGHT*1.05:
+            if self.player.y > HEIGHT*1.1:
                 self.game_started = False
                 self.score = 0
                 self.player.x = WIDTH // 4
@@ -95,6 +97,7 @@ class Game:
                 self.bullets = []
                 self.speed = SCROLL_SPEED
                 self.platforms = [Platform(-100, HEIGHT - 100, WIDTH//TILE_SIZE+2)]
+                self.loose += 1
                 for i in range(9):
                     self.platforms.append(generate_platforms(self.platforms[-1]))
             # Mise à jour des plateformes
@@ -126,7 +129,7 @@ class Game:
                 self.enemies.append(generate_enemy())
                 self.enemy_spawn_timer = 0
 
-            self.ui.draw_score(self.screen, self.score)  # Afficher le score
+            self.ui.draw_score(self.screen, int((self.speed-SCROLL_SPEED)/2+self.kills*10))  # Afficher le score
         elif self.paused: 
             self.player.update(0, 0, self.platforms)
             self.background.update(self.screen, 0)
@@ -155,6 +158,8 @@ class Game:
             if gain >= THRESHOLD:
                 if not self.game_started:
                     self.game_started = True
+                    if self.loose > 0:
+                        gain = 20
                 self.power_jump = gain
                 self.power_charge = frequency
                 

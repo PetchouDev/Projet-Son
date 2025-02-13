@@ -22,6 +22,7 @@ class Player:
         self.velocity_y = 0
         self.objective = self.y
         self.monte = False
+        self.was_on_ground = 1
         self.max_gain = 0
         self.loading = 0
         self.alive = True
@@ -37,21 +38,27 @@ class Player:
     def update(self, loading_bullet, jump_power, platforms, game_speed=1):
         if jump_power > THRESHOLD:
             self.loading += loading_bullet / self.divide
+            if self.was_on_ground:
+                jump_power *= 0.7
             if jump_power > self.max_gain:  # Seulement si la nouvelle puissance est plus forte
+                if self.was_on_ground:
+                    jump_power *= 1.2
                 self.velocity_y = -(jump_power - self.max_gain) * JUMP_FACTOR*3  # Applique la force du saut
                 self.max_gain = jump_power  # Mémorise la puissance du saut
                 self.monte = True  # Indique qu'on est en l'air
+                self.was_on_ground = False
         
         # Appliquer la gravité si en l'air
         if self.velocity_y != 0:
             self.y += max(min(self.velocity_y, game_speed*50), -game_speed*50) * game_speed
         final_pos = self.ground(platforms)
         if not final_pos or self.monte:
-            self.max_gain *=0.98  # Réduit la puissance max
+            self.max_gain *=0.995  # Réduit la puissance max
             self.velocity_y += 6*GRAVITY  # Ajouter une constante de gravité
             if self.velocity_y > 0:
                 self.monte = False
         else:
+            self.was_on_ground = True
             self.y = final_pos - self.display_size[1]
             self.velocity_y = 0  # Arrêter tout mouvement vertical
             self.max_gain = 0  # Réinitialiser le gain pour un nouveau saut
