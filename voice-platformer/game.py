@@ -151,11 +151,15 @@ class Game:
         while self.running:
 
             data = self.serial_reader.get_data()
+            target = 10
             gain = data["gain"]
             #activation barre espace
             keys = pygame.key.get_pressed()
             if keys[pygame.K_SPACE]:
-                gain = 10
+                gain = target
+                target += 1
+            else:
+                target = 10
             frequency = data["frequency"]
             button_pressed_1 = data["button_pressed_1"]
             button_pressed_2 = data["button_pressed_2"]
@@ -165,6 +169,7 @@ class Game:
                     self.game_started = True
                     if self.loose == 1:
                         gain = 20
+                        self.speed = 1
                 self.power_jump = gain
                 self.power_charge = frequency
                 
