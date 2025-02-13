@@ -84,15 +84,12 @@ class Player:
 
     def ground(self, platforms, vector):
         for platform in platforms:
-            print("====\nPlatform: ", platform.id)
             min_x = platform.x-4
             max_x = platform.x+platform.size+4
             print(platform.id, min_x, max_x, self.x, self.x+self.display_size[0])
             if self.x + self.display_size[0] > min_x and self.x < max_x:
-                print("Good X")
                 after = self.y + vector
                 if self.y == platform.y - self.display_size[1] or (self.y + self.display_size[1] <= platform.y and after + self.display_size[1] >= platform.y):
-                    print("On platform")
                     self.jump_factor = 1 # Réinitialise la puissance du saut
                     return platform.y
         return None
