@@ -76,22 +76,13 @@ class Player:
 
     def ground(self, platforms):
         for platform in platforms:
-            player_rect = pygame.Rect(self.x, self.y, self.display_size[0], self.display_size[1])
-
-            # Collision avec une plateforme
-            if player_rect.colliderect(platform.x+TILE_SIZE/2, platform.y, (platform.width) * TILE_SIZE, TILE_SIZE):   
-                
-                print("collide")
-                print(player_rect.center[1], platform.y + 64)
-
-                # Collision sur l'axe X 
-                if abs(player_rect.center[1] - (platform.y + 64)) < 80:
-                    print("X collision")
-                    print("m(X.X)m")
-                    input()
-                    return None
-                # Collision sur l'axe Y
-                else:
-                    print("Y collision")
-                    return platform.y
+            if self.y <= self.y+vector:
+                if self.y + self.display_size[1] == platform.y or self.y < platform.y-TILE_SIZE/2-self.display_size[1] < self.y+vector:
+                    print("plateforme traversée")
+                    min_x = platform.x-4
+                    max_x = platform.x+platform.width*TILE_SIZE+2
+                    if min_x < self.x < max_x:
+                        return platform.y
+                    elif min_x < self.x+self.display_size[0]*1.5 < max_x:    
+                        return platform.y
         return None
