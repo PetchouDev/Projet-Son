@@ -27,6 +27,8 @@ class Player:
         if mode:
             self.divide += 1
 
+        self.jump_factor = 1
+
     def change_mode(self, mode):
         self.divide = 6
         if mode:
@@ -49,7 +51,8 @@ class Player:
                 #    self.velocity_y = -(jump_power - self.max_gain) * JUMP_FACTOR * (1+self.max_gain/10)  # Applique la force du saut
                 #else:
                 #    self.velocity_y = -(jump_power - self.max_gain) * JUMP_FACTOR * (1+self.max_gain/10)
-                self.velocity_y = -(jump_power - self.max_gain) * JUMP_FACTOR * (1+self.max_gain/10)
+                self.velocity_y = -(jump_power - self.max_gain) * JUMP_FACTOR * (1+self.max_gain/10) * self.jump_factor
+                self.jump_factor /= 1.5 # Réduit la puissance du prochain saut
                 #self.jump +=1
                 self.max_gain = jump_power  # Mémorise la puissance du saut
         
@@ -61,7 +64,7 @@ class Player:
             final_pos = self.ground(platforms, vector)
         if not final_pos: #pas de plateforme traversée
                 self.y = max(self.y + vector, -self.display_size[1]/2)
-                self.max_gain *=0.98  # Réduit la puissance max
+                self.max_gain *=0.98 # Réduit la puissance max
                 self.velocity_y += GRAVITY  # Ajouter une constante de gravité
         else: #plateforme traversée
             self.y = final_pos - self.display_size[1]
@@ -90,5 +93,6 @@ class Player:
                 after = self.y + vector
                 if self.y == platform.y - self.display_size[1] or (self.y + self.display_size[1] <= platform.y and after + self.display_size[1] >= platform.y):
                     print("On platform")
+                    self.jump_factor = 1 # Réinitialise la puissance du saut
                     return platform.y
         return None

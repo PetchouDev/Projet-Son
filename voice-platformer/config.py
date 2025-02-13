@@ -10,7 +10,8 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 # --- Paramètres de physique ---
 GRAVITY = 0.8
 JUMP_FACTOR = 2
-SPAWN_JUMP= GRAVITY*5*JUMP_FACTOR
+
+SPAWN_JUMP= GRAVITY*JUMP_FACTOR
 SCROLL_SPEED = 8
 TILE_SIZE = 128
 
