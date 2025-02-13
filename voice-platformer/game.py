@@ -153,10 +153,9 @@ class Game:
             data = self.serial_reader.get_data()
             gain = data["gain"]
             #activation barre espace
-            for event in pygame.event.get():
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_SPACE:
-                        gain = 10
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_SPACE]:
+                gain = 10
             frequency = data["frequency"]
             button_pressed_1 = data["button_pressed_1"]
             button_pressed_2 = data["button_pressed_2"]
