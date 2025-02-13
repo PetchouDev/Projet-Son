@@ -10,8 +10,8 @@ class Enemy:
         self.sprite_sheet = pygame.transform.scale(self.sprite_sheet, (self.sprite_sheet.get_width() * 2, self.sprite_sheet.get_height() * 2))
         self.sprite_size = (64, 64)
         self.display_size = (192, 192)
-        self.images = [get_image(self, col, 1, self.display_size[0]) for col in range(6)]
-        self.animate_delay = 0.1
+        self.images = [pygame.transform.flip(get_image(self, col, 2, self.display_size[0]), True, False) for col in range(4)]
+        self.animate_delay = 0.2
         self.animate_timer = 0
         self.animate_index = 0
 
