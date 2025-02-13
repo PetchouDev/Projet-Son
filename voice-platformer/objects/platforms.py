@@ -14,7 +14,7 @@ class Platform:
         self.sprite_sheet = pygame.transform.scale(self.sprite_sheet, (self.sprite_sheet.get_width() * 4, self.sprite_sheet.get_height() * 4))
         self.sprite_size = (64, 64)
         self.display_size = (TILE_SIZE, TILE_SIZE)
-
+        self.has_enemy = False
         self.left = get_image(self, 3, 0, self.display_size[0])
         self.middle = get_image(self, 4, 0, self.display_size[0])
         self.right = get_image(self, 5, 0, self.display_size[0])

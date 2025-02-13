@@ -31,11 +31,15 @@ class Game:
 
         # Objets du jeu
         self.mode = False
+        self.enemies = []
         self.player = Player(self.mode)
         self.platforms = [Platform(-100, HEIGHT - 100, WIDTH//TILE_SIZE+2)]
         for i in range(9):
-            self.platforms.append(generate_platforms(self.platforms[-1]))
-        self.enemies = []
+            platform = generate_platforms(self.platforms[-1])
+            self.platforms.append(platform)
+            if len(self.enemies) < 5:
+                if platform.width > 1:
+                    self.enemies.append(generate_enemy(platform))
         self.bullets = []
         self.background = Background()
         self.ui = UI()
@@ -106,7 +110,11 @@ class Game:
                 platform.draw(self.screen)
                 if platform.x+platform.width*TILE_SIZE < -WIDTH:
                     self.platforms.remove(platform)
-                    self.platforms.append(generate_platforms(self.platforms[-1]))
+                    new_platform = generate_platforms(self.platforms[-1])
+                    self.platforms.append(new_platform)
+                    if len(self.enemies) < 5:
+                        if new_platform.width > 1:
+                            self.enemies.append(generate_enemy(platform))
 
                     
             # Mise à jour des bullets
@@ -118,16 +126,13 @@ class Game:
 
             # Mise à jour des ennemis
             for enemy in self.enemies:
-                enemy.update()
-                enemy.draw(self.screen)
-                if not enemy.active:
+                if not enemy:
                     self.enemies.remove(enemy)
-
-            # Générer un nouvel ennemi à intervalles réguliers
-            self.enemy_spawn_timer += 1
-            if self.enemy_spawn_timer > 100:
-                self.enemies.append(generate_enemy())
-                self.enemy_spawn_timer = 0
+                    continue
+                enemy.update(self.speed)
+                enemy.draw(self.screen, self.speed)
+                if enemy.x < -enemy.display_size[0]*2:
+                    self.enemies.remove(enemy)
 
             self.ui.draw_score(self.screen, int((self.speed-SCROLL_SPEED)/2+self.kills*10))  # Afficher le score
         elif self.paused: 
