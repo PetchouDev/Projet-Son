@@ -72,7 +72,7 @@ class Player:
                 final_pos = self.ground(platforms,next_pos-self.y)
                 if not final_pos: #Pas de plateforme après chute
                     self.y = next_pos
-                    self.falling_speed = min(self.falling_speed*1.2, 20*GRAVITY)
+                    self.falling_speed = min(self.falling_speed*1.2, CAP_GRAVITY)
                 else: #Plateforme après chute
                     self.y = final_pos - self.display_size[1]
                     self.max_gain = 0
@@ -101,7 +101,7 @@ class Player:
             final_pos = self.ground(platforms,next_pos-self.y)
             if not final_pos:  # Pas de plateforme traversée
                 self.y = next_pos
-                self.falling_speed = min(self.falling_speed*1.2, 20*GRAVITY)
+                self.falling_speed = min(self.falling_speed*1.2, CAP_GRAVITY)
     def reset(self):
         self.y = HEIGHT - 100 - self.display_size[1]
         self.velocity_y = 0

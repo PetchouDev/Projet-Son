@@ -52,7 +52,6 @@ class Game:
         self.power_jump = 0
         self.power_charge = 0
         self.loose = 0
-
         self.button_wait_1 = 0
         self.button_wait_2 = 0
 
@@ -82,7 +81,7 @@ class Game:
         if not self.game_started:
             self.background.update(self.screen, self.speed)
             self.player.draw(self.screen, self.speed)
-            self.platforms[0].update(self.speed)
+            self.platforms[0].update(self.speed, self.player, 0)
             self.platforms[0].spawn_platform()
             self.platforms[0].draw(self.screen)
             self.ui.draw_start_menu(self.screen)
@@ -93,10 +92,11 @@ class Game:
                 if self.speed > SCROLL_SPEED*3:
                     self.speed = SCROLL_SPEED*3
             self.speed += 0.015 
+            old_y = self.player.y
             self.player.update(self.power_charge, self.power_jump, self.platforms, self.speed)
+            
             self.power_jump = 0
             self.background.update(self.screen, self.speed)
-            self.player.draw(self.screen, self.speed)
             if self.player.y > HEIGHT*1.3:
                 self.game_started = False
                 self.player.reset()
@@ -108,8 +108,11 @@ class Game:
                 for i in range(6):
                     self.platforms.append(generate_platforms(self.platforms[-1], self.speed))
             # Mise à jour des plateformes
+            self.player.on_platform = None
             for platform in self.platforms:
-                platform.update(self.speed)
+                platform.update(self.speed, self.player, self.player.y-old_y)
+                """if not platform.player_on:
+                    self.player.on_platform = platform.player_on"""
                 platform.draw(self.screen)
                 if platform.x+platform.size < -WIDTH:
                     self.platforms.remove(platform)
@@ -118,7 +121,9 @@ class Game:
                     if len(self.enemies) < 5:
                         if new_platform.width > 1:
                             self.enemies.append(generate_enemy(platform))
-
+            """if platform.player_on:
+                self.player.y = platform.player_on"""
+            self.player.draw(self.screen, self.speed)
                     
             # Mise à jour des bullets
             for bullet in self.bullets:
