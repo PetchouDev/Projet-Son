@@ -26,7 +26,6 @@ class Game:
         self.running = True
         self.game_started = False
         self.paused = False
-        self.score = 0
         self.kills = 0
 
         # Objets du jeu
@@ -89,21 +88,24 @@ class Game:
             self.ui.draw_start_menu(self.screen)
 
         if not self.paused and self.game_started:
-            self.speed += 0.015
+            if self.speed < SCROLL_SPEED*3:
+                self.speed *= 1.05
+                if self.speed > SCROLL_SPEED*3:
+                    self.speed = SCROLL_SPEED*3
+            self.speed += 0.015 
             self.player.update(self.power_charge, self.power_jump, self.platforms, self.speed)
             self.power_jump = 0
             self.background.update(self.screen, self.speed)
             self.player.draw(self.screen, self.speed)
             if self.player.y > HEIGHT*1.3:
                 self.game_started = False
-                self.player.alive = False
-                self.score = 0
+                self.player.reset()
                 self.enemies = []
                 self.bullets = []
                 self.speed = SCROLL_SPEED
                 self.platforms = [Platform(-TILE_SIZE*3, HEIGHT - 100, WIDTH//TILE_SIZE+2)]
                 self.loose = 1
-                for i in range(9):
+                for i in range(6):
                     self.platforms.append(generate_platforms(self.platforms[-1], self.speed))
             # Mise à jour des plateformes
             for platform in self.platforms:
@@ -134,16 +136,14 @@ class Game:
                 enemy.draw(self.screen, self.speed)
                 if enemy.x < -enemy.display_size[0]*2:
                     self.enemies.remove(enemy)
-
-            self.ui.draw_score(self.screen, int((self.speed-SCROLL_SPEED)/2+self.kills*10))  # Afficher le score
+            print(self.speed)
+            self.ui.draw_score(self.screen, max(0,int((self.speed-SCROLL_SPEED*3)+self.kills*10)))  # Afficher le score
         elif self.paused: 
-            self.player.update(0, 0, self.platforms, self)
-            self.background.update(self.screen, 0)
 
-            self.player.draw(self.screen, self.speed)
+            self.player.draw(self.screen, 0)
             for platform in self.platforms:
                 platform.draw(self.screen)
-            self.ui.draw_score(self.screen, self.score)  # Afficher le score
+            self.ui.draw_score(self.screen, max(0,int((self.speed-SCROLL_SPEED*3)+self.kills*10)))  # Afficher le score
         pygame.display.flip()
 
     def run(self):
@@ -157,9 +157,7 @@ class Game:
             keys = pygame.key.get_pressed()
             if keys[pygame.K_SPACE]:
                 gain = target
-                target += 1
-            else:
-                target = 10
+
             frequency = data["frequency"]
             button_pressed_1 = data["button_pressed_1"]
             button_pressed_2 = data["button_pressed_2"]
@@ -169,7 +167,7 @@ class Game:
                     self.game_started = True
                     if self.loose == 1:
                         gain = 20
-                        self.speed = 1
+                        self.speed = SCROLL_SPEED
                 self.power_jump = gain
                 self.power_charge = frequency
                 
