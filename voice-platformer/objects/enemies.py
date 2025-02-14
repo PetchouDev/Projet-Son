@@ -23,7 +23,7 @@ class Enemy:
 
     def draw(self, screen, game_speed=1):
         if game_speed>0:
-            self.animate_timer += 1 / 25
+            self.animate_timer += 1 / 50
             if self.animate_timer >= self.animate_delay * 8 / game_speed:
                 self.animate_timer = 0
                 self.animate_index = (self.animate_index + 1) % len(self.images)

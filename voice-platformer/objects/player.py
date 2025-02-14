@@ -17,14 +17,11 @@ class Player:
         self.x = WIDTH // 4
         self.y = HEIGHT - 100 - self.display_size[1]
 
-        self.velocity_y = 0
         self.max_gain = 0
         self.loading = 0
-        self.alive = True
         self.divide = 6
         #self.jump = 0
         self.PID = PID(0.07,0.05,0.05, 0, self.y)
-        self.time_in_air = 0
         self.falling = True
         self.is_jumping = False
         self.starting_jump_y = 0
@@ -90,7 +87,6 @@ class Player:
                 self.max_gain *= 0.98 # Réduit la puissance max
             else:  # Plateforme traversée
                 self.y = final_pos - self.display_size[1]
-                self.velocity_y = 0  # Arrêter tout mouvement vertical
                 self.max_gain = 0  # Réinitialiser le gain pour un nouveau saut
                 self.jump_factor = 1  # Réinitialiser la puissance du saut
                 self.falling = True
@@ -104,14 +100,11 @@ class Player:
                 self.falling_speed = min(self.falling_speed*1.2, CAP_GRAVITY)
     def reset(self):
         self.y = HEIGHT - 100 - self.display_size[1]
-        self.velocity_y = 0
         self.max_gain = 0
         self.loading = 0
-        self.alive = True
         self.divide = 6
         self.jump_factor = 1
         self.PID.set_consigne(0, self.y, True)
-        self.time_in_air = 0
         self.falling = True
         self.is_jumping = False
         self.starting_jump_y = 0
@@ -119,7 +112,7 @@ class Player:
         self.falling_speed = GRAVITY           
 
 
-    def update2(self, loading_bullet, jump_power, platforms, game_speed):
+    """def update2(self, loading_bullet, jump_power, platforms, game_speed):
         if self.velocity_y < 0:  # Bloque la mise à jour de la puissance tant que le joueur monte
             jump_power = self.max_gain
 
@@ -155,11 +148,11 @@ class Player:
             self.velocity_y = 0  # Arrêter tout mouvement vertical
             self.max_gain = 0  # Réinitialiser le gain pour un nouveau saut
             self.jump_factor = 1  # Réinitialiser la puissance du saut
-
+"""
 
     def draw(self, screen, game_speed=1):
         if game_speed>0:
-            self.animate_timer += 1 / 25
+            self.animate_timer += 1 / 40
             if self.animate_timer >= self.animate_delay * 8 / game_speed:
                 self.animate_timer = 0
                 self.animate_index = (self.animate_index + 1) % len(self.images)
@@ -173,7 +166,6 @@ class Player:
             if self.x + self.display_size[0] > min_x and self.x < max_x:
                 after = self.y + vector
                 if (self.y + self.display_size[1] <= platform.y and after + self.display_size[1] >= platform.y):
-                    self.jump_factor = 1 # Réinitialise la puissance du saut
                     return platform.y
         return None
 
@@ -197,7 +189,7 @@ class PID:
             self.timer = 0
 
     def update(self):
-        self.timer += GRAVITY
+        self.timer += GRAVITY*0.75
         self.setpoint+=self.timer
         error = self.setpoint - self.value
         self.integral += error

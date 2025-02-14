@@ -18,7 +18,6 @@ class Game:
         # Initialisation de la fenêtre
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
         pygame.display.set_caption("Shout 2 Play")
-        
         # Autres initialisations
         self.clock = pygame.time.Clock()
         self.serial_reader = SerialReader()
@@ -33,6 +32,7 @@ class Game:
         self.enemies = []
         self.player = Player(self.mode)
         
+        pygame.display.set_icon(self.player.images[0])
         self.speed = SCROLL_SPEED
         self.platforms = [Platform(-100, HEIGHT - 100, WIDTH//TILE_SIZE+2)]
         for i in range(9):
@@ -81,7 +81,7 @@ class Game:
         if not self.game_started:
             self.background.update(self.screen, self.speed)
             self.player.draw(self.screen, self.speed)
-            self.platforms[0].update(self.speed, self.player, 0)
+            self.platforms[0].update(self.speed)
             self.platforms[0].spawn_platform()
             self.platforms[0].draw(self.screen)
             self.ui.draw_start_menu(self.screen)
@@ -97,6 +97,7 @@ class Game:
             
             self.power_jump = 0
             self.background.update(self.screen, self.speed)
+            self.player.draw(self.screen, self.speed)
             if self.player.y > HEIGHT*1.3:
                 self.game_started = False
                 self.player.reset()
@@ -108,22 +109,17 @@ class Game:
                 for i in range(6):
                     self.platforms.append(generate_platforms(self.platforms[-1], self.speed))
             # Mise à jour des plateformes
-            self.player.on_platform = None
             for platform in self.platforms:
-                platform.update(self.speed, self.player, self.player.y-old_y)
-                """if not platform.player_on:
-                    self.player.on_platform = platform.player_on"""
+                platform.update(self.speed)
                 platform.draw(self.screen)
                 if platform.x+platform.size < -WIDTH:
                     self.platforms.remove(platform)
                     new_platform = generate_platforms(self.platforms[-1], self.speed)
                     self.platforms.append(new_platform)
                     if len(self.enemies) < 5:
-                        if new_platform.width > 1:
+                        if new_platform.width > 2:
                             self.enemies.append(generate_enemy(platform))
-            """if platform.player_on:
-                self.player.y = platform.player_on"""
-            self.player.draw(self.screen, self.speed)
+            
                     
             # Mise à jour des bullets
             for bullet in self.bullets:

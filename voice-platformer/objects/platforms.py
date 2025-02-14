@@ -44,26 +44,13 @@ class Platform:
         rendered_text = font.render(str(self.id), True, color)
         screen.blit(rendered_text, (self.x - rendered_text.get_width() // 2, y))
 
-    def update(self, speed, player, vector):
+    def update(self, speed):
         self.x -= self.speed*speed
-        """self.player_on = None
-        if vector > 0:
-            self.player_on = self.check_collide(player, vector) """
-
-    def check_collide(self, player, vector):
-        min_x = self.x+TILE_SIZE/2
-        max_x = self.x+self.size+4
-        if player.x + player.display_size[0] > min_x and player.x < max_x:
-            after = player.y + vector
-            if (player.y + player.display_size[1] <= self.y and after + player.display_size[1] >= self.y):
-                self.player.jump_factor = 1 # Réinitialise la puissance du saut
-                return self.y
-        return None
     
 def generate_platforms(before, game_speed=1):
     max_width = int(2+game_speed/SCROLL_SPEED)
     width=random.randint(1, max_width)
-    min_x = before.x+before.size+(1+game_speed/SCROLL_SPEED)*TILE_SIZE
+    min_x = before.x+before.size+(1/2+game_speed/SCROLL_SPEED)*TILE_SIZE
     x = random.randint(int(min_x), int(min_x+TILE_SIZE*(max_width+width)))
     y_borne1 = int(max(TILE_SIZE*3, before.y-TILE_SIZE*3))
     y_borne2 = int(min(HEIGHT-TILE_SIZE*0.5, before.y+TILE_SIZE*3))
