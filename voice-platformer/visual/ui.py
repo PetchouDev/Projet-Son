@@ -14,6 +14,22 @@ class UI:
             screen.blit(rendered_text, (WIDTH // 2 - rendered_text.get_width() // 2, y))
             y += self.font.get_height()
     
+    def draw_start_text(self, screen, text, score, color, y_offset=0):
+        lines = self.split_text(text, screen.get_width() - 40)  # Ajuste la largeur max
+        lines2 = self.split_text(score, screen.get_width() - 40)  # Ajuste la largeur max
+        y = HEIGHT * 0.4 + y_offset - (len(lines) * self.font.get_height()) // 2
+        for line in lines:
+            rendered_text = self.font.render(line, True, color)
+            screen.blit(rendered_text, (WIDTH // 2 - rendered_text.get_width() // 2, y))
+            y += self.font.get_height()
+        for line2 in lines2:
+            rendered_text = self.font2.render(line2, True, color)
+            screen.blit(rendered_text, (WIDTH // 2 - rendered_text.get_width() // 2, y))
+            y += self.font2.get_height()
+
+
+
+    
     def draw_score(self, screen, score, color=WHITE):
         text = f"Score: {score}"
         lines = self.split_text(text, screen.get_width() - 40)  # Ajuste la largeur max
@@ -41,8 +57,8 @@ class UI:
         
         return lines
     
-    def draw_start_menu(self, screen):
-        self.draw_text(screen, "SHOUT 2 PLAY", WHITE)
+    def draw_start_menu(self, screen, best_score):
+        self.draw_start_text(screen, "SHOUT 2 PLAY", f"Best Score : {best_score}", WHITE)
     
     def draw_pause_menu(self, screen):
         self.draw_text(screen, "PAUSE - Criez pour reprendre", WHITE)

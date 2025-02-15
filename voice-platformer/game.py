@@ -26,6 +26,7 @@ class Game:
         self.game_started = False
         self.paused = False
         self.kills = 0
+        self.best_score = 0
 
         # Objets du jeu
         self.mode = False
@@ -89,7 +90,7 @@ class Game:
             self.platforms[0].update(self.speed)
             self.platforms[0].spawn_platform()
             self.platforms[0].draw(self.screen)
-            self.ui.draw_start_menu(self.screen)
+            self.ui.draw_start_menu(self.screen, self.best_score)
 
         if not self.paused and self.game_started:
             if self.speed < SCROLL_SPEED*3:
@@ -104,6 +105,7 @@ class Game:
             
             if self.player.y > HEIGHT*1.3:
                 self.game_started = False
+                self.best_score = max(self.best_score, max(0, int(self.speed-SCROLL_SPEED*3+self.kills*10)))
                 self.kills = 0
                 self.player.reset()
                 self.enemies = []
@@ -159,14 +161,14 @@ class Game:
                 # pygame.draw.rect(self.screen, (255, 0, 0), bullet.image.get_rect(topleft=(bullet.x, bullet.y)), 2)
 
             # print(self.speed)
-            self.ui.draw_score(self.screen, max(0,int((self.speed-SCROLL_SPEED*3)+self.kills*10)))  # Afficher le score
+            self.ui.draw_score(self.screen, max(0, int(self.speed-SCROLL_SPEED*3+self.kills*10)))  # Afficher le score
             self.ui.loading_bar(self.screen, self.player.loading)
         elif self.paused: 
 
             self.player.draw(self.screen, 0)
             for platform in self.platforms:
                 platform.draw(self.screen)
-            self.ui.draw_score(self.screen, max(0,int((self.speed-SCROLL_SPEED*3)+self.kills*10)))  # Afficher le score
+            self.ui.draw_score(self.screen, max(0, int(self.speed-SCROLL_SPEED*3+self.kills*10)))  # Afficher le score
             self.ui.loading_bar(self.screen, self.player.loading)
         pygame.display.flip()
 
