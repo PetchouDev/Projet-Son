@@ -10,7 +10,7 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 # --- Paramètres de physique ---
 GRAVITY = 7
 JUMP_FACTOR = 20
-CAP_GRAVITY = GRAVITY*15
+CAP_GRAVITY = GRAVITY*10
 
 SPAWN_JUMP= GRAVITY*JUMP_FACTOR*10
 SCROLL_SPEED = 8

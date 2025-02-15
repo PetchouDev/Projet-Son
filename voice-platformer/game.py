@@ -35,12 +35,7 @@ class Game:
         pygame.display.set_icon(self.player.images[0])
         self.speed = SCROLL_SPEED
         self.platforms = [Platform(-100, HEIGHT - 100, WIDTH//TILE_SIZE+2)]
-        for i in range(9):
-            platform = generate_platforms(self.platforms[-1], self.speed)
-            self.platforms.append(platform)
-            if len(self.enemies) < 5:
-                if platform.width > 1:
-                    self.enemies.append(generate_enemy(platform))
+        self.construct_platform(6)
         self.bullets = []
         self.touched_bullets = []
         self.background = Background()
@@ -56,6 +51,14 @@ class Game:
         self.button_wait_1 = 0
         self.button_wait_2 = 0
         self.shoot_wait = 0
+
+    def construct_platform(self, n):
+        for i in range(n):
+            platform = generate_platforms(self.platforms[-1], self.speed)
+            self.platforms.append(platform)
+            if len(self.enemies) < 5:
+                if platform.width > 1:
+                    self.enemies.append(generate_enemy(platform))
 
     def handle_events(self, button_pressed_1, button_pressed_2):
         """Gestion des événements clavier et souris"""
@@ -93,8 +96,7 @@ class Game:
                 self.speed *= 1.05
                 if self.speed > SCROLL_SPEED*3:
                     self.speed = SCROLL_SPEED*3
-            self.speed += 0.015 
-            old_y = self.player.y
+            self.speed += 0.015
             self.player.update(self.power_charge, self.power_jump, self.platforms, self.speed)
             
             self.power_jump = 0
@@ -102,38 +104,36 @@ class Game:
             
             if self.player.y > HEIGHT*1.3:
                 self.game_started = False
+                self.kills = 0
                 self.player.reset()
                 self.enemies = []
                 self.bullets = []
+                self.touched_bullets = []
                 self.speed = SCROLL_SPEED
                 self.platforms = [Platform(-TILE_SIZE*3, HEIGHT - 100, WIDTH//TILE_SIZE+2)]
                 self.loose = 1
-                for i in range(6):
-                    self.platforms.append(generate_platforms(self.platforms[-1], self.speed))
+                self.construct_platform(6)
+            self.player.draw(self.screen, self.speed)
 
+            # Mise à jour des plateformes
+            for platform in self.platforms:
+                platform.update(self.speed)
+                platform.draw(self.screen)
+                if platform.x+platform.size < -WIDTH:
+                    self.platforms.remove(platform)
+                    self.construct_platform(1)
             # Mise à jour des bullets
             for bullet in self.bullets:
                 bullet.update(self.speed * 0.5)
+                bullet.draw(self.screen)
                 if not bullet.active:
                     self.bullets.remove(bullet)
 
             for bullet in self.touched_bullets:
                 bullet.update(self.speed * 0.5)
+                bullet.draw(self.screen)
                 if not bullet.active:
                     self.touched_bullets.remove(bullet)
-
- 
-
-            # Mise à jour des plateformes
-            for platform in self.platforms:
-                platform.update(self.speed)
-                if platform.x+platform.size < -WIDTH:
-                    self.platforms.remove(platform)
-                    new_platform = generate_platforms(self.platforms[-1], self.speed)
-                    self.platforms.append(new_platform)
-                    if len(self.enemies) < 5:
-                        if new_platform.width > 2:
-                            self.enemies.append(generate_enemy(platform))
 
             # Mise à jour des ennemis
             for enemy in self.enemies:
@@ -155,70 +155,63 @@ class Game:
                     self.enemies.remove(enemy)
 
 
-
-            # Affichage des bullets
-            for bullet in self.bullets:
-                bullet.draw(self.screen)
-
                 #draw rect 
                 # pygame.draw.rect(self.screen, (255, 0, 0), bullet.image.get_rect(topleft=(bullet.x, bullet.y)), 2)
 
-            # Affichage du joueur
-            self.player.draw(self.screen, self.speed)
-
-            # Affichage des plateformes
-            for platform in self.platforms:
-                platform.draw(self.screen)
-
-            # Affichage des oeufs touchés
-            for bullet in self.touched_bullets:
-                bullet.draw(self.screen)
-
             # print(self.speed)
             self.ui.draw_score(self.screen, max(0,int((self.speed-SCROLL_SPEED*3)+self.kills*10)))  # Afficher le score
+            self.ui.loading_bar(self.screen, self.player.loading)
         elif self.paused: 
 
             self.player.draw(self.screen, 0)
             for platform in self.platforms:
                 platform.draw(self.screen)
             self.ui.draw_score(self.screen, max(0,int((self.speed-SCROLL_SPEED*3)+self.kills*10)))  # Afficher le score
+            self.ui.loading_bar(self.screen, self.player.loading)
         pygame.display.flip()
 
+    def shoot(self):
+        self.bullets.append(Bullet(self.player.x, self.player.y, self.speed))
+        self.player.loading = max(self.player.loading-100, 0)
+        
     def run(self):
         """Boucle principale du jeu"""
         while self.running:
 
             data = self.serial_reader.get_data()
+            frequency = data["frequency"]
+            button_pressed_1 = data["button_pressed_1"]
+            button_pressed_2 = data["button_pressed_2"]
+            self.volume = data["potentiometer_value"]
+
             target = 10
             gain = data["gain"]
             #activation barre espace
             keys = pygame.key.get_pressed()
+            self.handle_events(button_pressed_1, button_pressed_2)
             if keys[pygame.K_SPACE]:
                 gain = target
-
+                frequency = 600
+            if keys[pygame.K_UP]:
+                gain = 17 #PMAX giga cri dB
+                #Pmin, gain = 4, parler normal dB
+                frequency = 600
             if keys[pygame.K_z]:
-                if time() - self.shoot_wait > 1: # 1 seconde entre chaque tir
-                    self.bullets.append(Bullet(self.player.x, self.player.y, self.speed))
+                if time() - self.shoot_wait > 1 and self.player.loading >=100: # 1 seconde entre chaque tir
+                    self.shoot()
                     self.shoot_wait = time()
 
             if self.shoot_wait > 0:
                 self.shoot_wait -= 1/FPS
             
-
-            frequency = data["frequency"]
-            button_pressed_1 = data["button_pressed_1"]
-            button_pressed_2 = data["button_pressed_2"]
-            self.volume = data["potentiometer_value"]
             if gain >= THRESHOLD:
                 if not self.game_started:
                     self.game_started = True
                     if self.loose == 1:
-                        gain = 20
+                        gain = 10
                         self.speed = SCROLL_SPEED
                 self.power_jump = gain
                 self.power_charge = frequency
-                
-            self.handle_events(button_pressed_1, button_pressed_2)
             self.update_draw()
             self.clock.tick(FPS)
 

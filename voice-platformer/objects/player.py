@@ -19,43 +19,42 @@ class Player:
 
         self.max_gain = 0
         self.loading = 0
-        self.divide = 6
+        self.divide = 0
+        self.change_mode(mode)
         #self.jump = 0
-        self.PID = PID(0.07,0.05,0.05, 0, self.y)
+        self.PID = PID(0.04,0.05,0.05, 0, self.y)
         self.falling = True
         self.is_jumping = False
         self.starting_jump_y = 0
         self.consigne = 0
         self.falling_speed = GRAVITY
 
-        if mode:
-            self.divide += 1
-
         self.jump_factor = 1
 
     def change_mode(self, mode):
-        self.divide = 6
+        self.divide = 1000
         if mode:
-            self.divide += 1
+            self.divide += 100
 
 
     def update(self, loading_bullet, jump_power, platforms, game_speed):
         if jump_power > THRESHOLD:
             self.loading += loading_bullet / self.divide
-            self.loading = max(300, self.loading)
+            self.loading = min(300, self.loading)
 
             if self.is_jumping:
                 if self.falling:
-                    self.consigne = self.y-jump_power*JUMP_FACTOR/self.falling_speed*self.jump_factor
+                    self.jump_factor /= 1.1
+                    self.consigne = self.y-jump_power*JUMP_FACTOR/self.falling_speed*self.jump_factor*1.5
                     self.falling = False
                     self.falling_speed = GRAVITY
-                    self.jump_factor /= 1.1
                     self.PID.set_consigne(max(-self.display_size[1],self.consigne), self.y, False)
                 else:
                     self.consigne = self.starting_jump_y-jump_power*JUMP_FACTOR*self.jump_factor*2
                     self.PID.set_consigne(max(-self.display_size[1],self.consigne), self.y, False)
             else:
                 self.consigne = self.y-jump_power*JUMP_FACTOR*2
+                print(self.consigne)
                 self.is_jumping = True
                 self.falling = False
                 self.starting_jump_y = self.y
@@ -84,7 +83,7 @@ class Player:
                 
             if not final_pos:  # Pas de plateforme traversée
                 self.y = next_pos
-                self.max_gain *= 0.98 # Réduit la puissance max
+                self.max_gain *= 0.99 # Réduit la puissance max
             else:  # Plateforme traversée
                 self.y = final_pos - self.display_size[1]
                 self.max_gain = 0  # Réinitialiser le gain pour un nouveau saut
@@ -102,7 +101,6 @@ class Player:
         self.y = HEIGHT - 100 - self.display_size[1]
         self.max_gain = 0
         self.loading = 0
-        self.divide = 6
         self.jump_factor = 1
         self.PID.set_consigne(0, self.y, True)
         self.falling = True

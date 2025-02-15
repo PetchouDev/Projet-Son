@@ -50,12 +50,12 @@ class Platform:
 def generate_platforms(before, game_speed=1):
     max_width = int(2+game_speed/SCROLL_SPEED)
     width=random.randint(1, max_width)
-    min_x = before.x+before.size+(1/2+game_speed/SCROLL_SPEED)*TILE_SIZE
-    x = random.randint(int(min_x), int(min_x+TILE_SIZE*(max_width+width)))
+    min_x = before.x+before.size+(1+game_speed/2*SCROLL_SPEED)*TILE_SIZE
     y_borne1 = int(max(TILE_SIZE*3, before.y-TILE_SIZE*3))
     y_borne2 = int(min(HEIGHT-TILE_SIZE*0.5, before.y+TILE_SIZE*3))
     if y_borne1 > y_borne2:
         y = random.randint(y_borne2, y_borne1)
     else:
         y = random.randint(y_borne1, y_borne2)
+    x = random.randint(int(min_x), int(min_x+TILE_SIZE*(max_width+width-abs(y-before.y)/TILE_SIZE)))
     return Platform(x, y, width, id=before.id+1)
