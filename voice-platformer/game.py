@@ -42,6 +42,7 @@ class Game:
                 if platform.width > 1:
                     self.enemies.append(generate_enemy(platform))
         self.bullets = []
+        self.touched_bullets = []
         self.background = Background()
         self.ui = UI()
         self.pause = Pause()
@@ -54,6 +55,7 @@ class Game:
         self.loose = 0
         self.button_wait_1 = 0
         self.button_wait_2 = 0
+        self.shoot_wait = 0
 
     def handle_events(self, button_pressed_1, button_pressed_2):
         """Gestion des événements clavier et souris"""
@@ -97,7 +99,7 @@ class Game:
             
             self.power_jump = 0
             self.background.update(self.screen, self.speed)
-            self.player.draw(self.screen, self.speed)
+            
             if self.player.y > HEIGHT*1.3:
                 self.game_started = False
                 self.player.reset()
@@ -108,10 +110,23 @@ class Game:
                 self.loose = 1
                 for i in range(6):
                     self.platforms.append(generate_platforms(self.platforms[-1], self.speed))
+
+            # Mise à jour des bullets
+            for bullet in self.bullets:
+                bullet.update(self.speed * 0.5)
+                if not bullet.active:
+                    self.bullets.remove(bullet)
+
+            for bullet in self.touched_bullets:
+                bullet.update(self.speed * 0.5)
+                if not bullet.active:
+                    self.touched_bullets.remove(bullet)
+
+ 
+
             # Mise à jour des plateformes
             for platform in self.platforms:
                 platform.update(self.speed)
-                platform.draw(self.screen)
                 if platform.x+platform.size < -WIDTH:
                     self.platforms.remove(platform)
                     new_platform = generate_platforms(self.platforms[-1], self.speed)
@@ -119,25 +134,47 @@ class Game:
                     if len(self.enemies) < 5:
                         if new_platform.width > 2:
                             self.enemies.append(generate_enemy(platform))
-            
-                    
-            # Mise à jour des bullets
-            for bullet in self.bullets:
-                bullet.update()
-                platform.draw(self.screen)
-                if not bullet.active:
-                    self.bullets.remove(bullet)
 
             # Mise à jour des ennemis
             for enemy in self.enemies:
                 if not enemy:
                     self.enemies.remove(enemy)
                     continue
-                enemy.update(self.speed)
+                died_from = enemy.update(self.speed, self.bullets) # Vérifier si l'ennemi est touché
+                if died_from:
+                    self.enemies.remove(enemy) 
+                    self.bullets.remove(died_from)
+                    self.touched_bullets.append(died_from) # Afficher l'oeuf au plat au 1er plan
+                    self.kills += 1
+                    continue
                 enemy.draw(self.screen, self.speed)
+                #pygame.draw.line(self.screen, (255, 0, 0),( WIDTH//2, HEIGHT), (enemy.x, enemy.y), 2)
+                # draw rect
+                # pygame.draw.rect(self.screen, (255, 0, 0), enemy.images[enemy.animate_index].get_rect(topleft=(enemy.x, enemy.y)), 2)
                 if enemy.x < -enemy.display_size[0]*2:
                     self.enemies.remove(enemy)
-            print(self.speed)
+
+
+
+            # Affichage des bullets
+            for bullet in self.bullets:
+                bullet.draw(self.screen)
+
+                #draw rect 
+                # pygame.draw.rect(self.screen, (255, 0, 0), bullet.image.get_rect(topleft=(bullet.x, bullet.y)), 2)
+
+            # Affichage du joueur
+            self.player.draw(self.screen, self.speed)
+
+            # Affichage des plateformes
+            for platform in self.platforms:
+                platform.draw(self.screen)
+
+            # Affichage des oeufs touchés
+            for bullet in self.touched_bullets:
+                bullet.draw(self.screen)
+
+            # print(self.speed)
             self.ui.draw_score(self.screen, max(0,int((self.speed-SCROLL_SPEED*3)+self.kills*10)))  # Afficher le score
         elif self.paused: 
 
@@ -158,6 +195,15 @@ class Game:
             keys = pygame.key.get_pressed()
             if keys[pygame.K_SPACE]:
                 gain = target
+
+            if keys[pygame.K_z]:
+                if time() - self.shoot_wait > 1: # 1 seconde entre chaque tir
+                    self.bullets.append(Bullet(self.player.x, self.player.y, self.speed))
+                    self.shoot_wait = time()
+
+            if self.shoot_wait > 0:
+                self.shoot_wait -= 1/FPS
+            
 
             frequency = data["frequency"]
             button_pressed_1 = data["button_pressed_1"]

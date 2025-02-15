@@ -2,7 +2,7 @@ from typing import Optional
 import pygame
 
 
-def get_image(self, col:int, row:int, resize:Optional[int]=None) -> pygame.Surface:
+def get_image(self, col:int, row:int, resize:Optional[int]=None, sprite_sheet=None) -> pygame.Surface:
     """
     Récupère une image à partir d'une feuille de sprites et la redimensionne si nécessaire.
 
@@ -17,7 +17,10 @@ def get_image(self, col:int, row:int, resize:Optional[int]=None) -> pygame.Surfa
     """
     x,y = self.sprite_size
     image = pygame.Surface((x, y), pygame.SRCALPHA)
-    image.blit(self.sprite_sheet, (0, 0), (col*x, row*y, x, y))
+
+    sheet = sprite_sheet if sprite_sheet else self.sprite_sheet
+
+    image.blit(sheet, (0, 0), (col*x, row*y, x, y))
 
     if resize:
         # redimensionner l'image 
