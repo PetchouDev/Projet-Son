@@ -1,11 +1,12 @@
 import pygame
+import sys
 from time import time
 from config import *
 from objects.player import Player
 from objects.platforms import Platform, generate_platforms
 from objects.bullets import Bullet, generate_bullet
 from objects.enemies import Enemy, generate_enemy
-from communicate.serial import SerialReader, SerialSender
+from communicate.serialMonitor import SerialMonitor
 from visual.background import Background
 from visual.ui import UI
 from menus.pause import Pause
@@ -20,8 +21,7 @@ class Game:
         pygame.display.set_caption("Shout 2 Play")
         # Autres initialisations
         self.clock = pygame.time.Clock()
-        self.serial_reader = SerialReader()
-        self.serial_sender = SerialSender()
+        self.serial_reader = SerialMonitor(SERIAL_PORT, BAUD_RATE)
         self.running = True
         self.game_started = False
         self.paused = False
@@ -35,6 +35,7 @@ class Game:
         
         pygame.display.set_icon(self.player.images[0])
         self.speed = SCROLL_SPEED
+        self.calibrate = 70
         self.platforms = [Platform(-100, HEIGHT - 100, WIDTH//TILE_SIZE+2)]
         self.construct_platform(6)
         self.bullets = []
@@ -52,6 +53,7 @@ class Game:
         self.button_wait_1 = 0
         self.button_wait_2 = 0
         self.shoot_wait = 0
+        self.pause_wait = 0 
 
     def construct_platform(self, n):
         for i in range(n):
@@ -61,26 +63,35 @@ class Game:
                 if platform.width > 1:
                     self.enemies.append(generate_enemy(platform))
 
-    def handle_events(self, button_pressed_1, button_pressed_2):
+    def handle_events(self):
         """Gestion des événements clavier et souris"""
-        if button_pressed_1:
-            self.player.change_mode(not self.player.divide)
-        if button_pressed_2:
-            self.pause = not self.pause
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                self.running = False
-
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN:  # Appui sur Enter
-                    if not self.game_started:  
-                        self.game_started = True  # Démarrer le jeu
-                    elif self.paused:
-                        self.paused = False  # Reprendre la partie
-                
-                elif event.key == pygame.K_ESCAPE:  # Appui sur Échap
-                    if self.game_started:
-                        self.paused = not self.paused  # Pause ou reprise
+        keys = pygame.key.get_pressed()
+        data = self.serial_reader.get_data()
+        print(data)
+        self.power_jump = data["gain"]-self.calibrate
+        self.power_charge = data["frequency"]
+        if (data["button_pressed_shoot"] or keys[pygame.K_z]) and  time() - self.shoot_wait:
+            self.shoot()
+            self.shoot_wait = time()
+        if (data["button_pressed_pause"] or keys[pygame.K_ESCAPE]) and time() - self.pause_wait > 1:  # 1 seconde entre chaque appui
+            self.paused = not self.paused
+            self.pause_wait = time()
+        if data["divider"]:
+            self.player.change_mode(data["divider"])
+        if data["threshold"]:
+            self.calibrate = data["threshold"]
+        if keys[pygame.K_RETURN]:  # Appui sur Enter
+            if not self.game_started:  
+                self.game_started = True  # Démarrer le jeu
+            elif self.paused:
+                self.paused = False
+        if keys[pygame.K_SPACE]:
+            self.power_jump = 10
+        
+        if self.shoot_wait > 0:
+            self.shoot_wait -= 1/FPS
+        if self.pause_wait > 0:
+            self.pause_wait -= 1/FPS
 
     def update_draw(self):
         """Mise à jour des objets du jeu"""
@@ -178,43 +189,22 @@ class Game:
         
     def run(self):
         """Boucle principale du jeu"""
+        self.serial_reader.start()
         while self.running:
 
-            data = self.serial_reader.get_data()
-            frequency = data["frequency"]
-            button_pressed_1 = data["button_pressed_1"]
-            button_pressed_2 = data["button_pressed_2"]
-            self.volume = data["potentiometer_value"]
+            self.handle_events()
 
-            target = 10
-            gain = data["gain"]
-            #activation barre espace
-            keys = pygame.key.get_pressed()
-            self.handle_events(button_pressed_1, button_pressed_2)
-            if keys[pygame.K_SPACE]:
-                gain = target
-                frequency = 600
-            if keys[pygame.K_UP]:
-                gain = 17 #PMAX giga cri dB
-                #Pmin, gain = 4, parler normal dB
-                frequency = 600
-            if keys[pygame.K_z]:
-                if time() - self.shoot_wait > 1 and self.player.loading >=100: # 1 seconde entre chaque tir
-                    self.shoot()
-                    self.shoot_wait = time()
-
-            if self.shoot_wait > 0:
-                self.shoot_wait -= 1/FPS
-            
-            if gain >= THRESHOLD:
+            if self.power_jump >= THRESHOLD:
                 if not self.game_started:
                     self.game_started = True
                     if self.loose == 1:
-                        gain = 10
+                        self.power_jump = 10
                         self.speed = SCROLL_SPEED
-                self.power_jump = gain
-                self.power_charge = frequency
             self.update_draw()
             self.clock.tick(FPS)
+        
+        self.serial_reader.stop()
+        del self.serial_reader
+        sys.exit()
 
         pygame.quit()

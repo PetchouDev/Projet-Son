@@ -19,8 +19,7 @@ class Player:
 
         self.max_gain = 0
         self.loading = 0
-        self.divide = 0
-        self.change_mode(mode)
+        self.divide = 1000
         #self.jump = 0
         self.PID = PID(0.04,0.05,0.05, 0, self.y)
         self.falling = True
@@ -28,17 +27,15 @@ class Player:
         self.starting_jump_y = 0
         self.consigne = 0
         self.falling_speed = GRAVITY
-
+        self.threshold = THRESHOLD
         self.jump_factor = 1
 
-    def change_mode(self, mode):
-        self.divide = 1000
-        if mode:
-            self.divide += 100
+    def change_mode(self, divider):
+        self.divide = divider
 
 
     def update(self, loading_bullet, jump_power, platforms, game_speed):
-        if jump_power > THRESHOLD:
+        if jump_power > self.threshold:
             self.loading += loading_bullet / self.divide
             self.loading = min(300, self.loading)
 

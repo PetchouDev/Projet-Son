@@ -3,7 +3,7 @@ pygame.init()
 # --- Configurations générales ---
 infoObject = pygame.display.Info()
 WIDTH, HEIGHT = infoObject.current_w, infoObject.current_h
-#WIDTH, HEIGHT = 800,600
+WIDTH, HEIGHT = 800,600
 FPS = 30
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
@@ -17,12 +17,12 @@ SCROLL_SPEED = 8
 TILE_SIZE = 128
 
 # --- Serial (Teensy) ---
-SERIAL_PORT = "COM3"  # À ajuster
+SERIAL_PORT = "COM13"  # À ajuster
 BAUD_RATE = 115200
 # config.py - Fichier de configuration du jeu
 
 # --- Paramètres Vocaux ---
-THRESHOLD = 1  # Seuil pour la détection de la voix
+THRESHOLD = 0  # Seuil pour la détection de la voix
 
 # Couleurs
 WHITE = (255, 255, 255)
