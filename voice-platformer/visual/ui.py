@@ -8,6 +8,7 @@ class UI:
         self.note_names = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
         self.notes = []
         self.note_labels = []
+        self.lastfreq = 0
         for octave in range(9):  # De l'octave 0 à 8
             for i, base_freq in enumerate([16.35, 17.32, 18.35, 19.45, 20.60, 21.83, 23.12, 24.50, 25.96, 27.50, 29.14, 30.87]):
                 freq_octave = base_freq * (2 ** octave)
@@ -39,26 +40,29 @@ class UI:
 
     def freq_to_note(self, screen, freq, active=False, color=WHITE):
         if active:
-            closest_index = min(range(len(self.notes)), key=lambda i: abs(self.notes[i] - freq))  # Trouver l'index de la note la plus proche
-            closest = self.notes[closest_index]
-            note = self.note_labels[closest_index]
-            
-            # Calculer l'écart relatif en fonction de la moitié de la distance avec la note précédente ou suivante
-            if closest_index == 0:
-                reference_gap = (self.notes[1] - self.notes[0]) / 2
-            elif closest_index == len(self.notes) - 1:
-                reference_gap = (self.notes[-1] - self.notes[-2]) / 2
-            else:
-                lower_gap = (closest - self.notes[closest_index - 1]) / 2
-                upper_gap = (self.notes[closest_index + 1] - closest) / 2
-                reference_gap = lower_gap if freq < closest else upper_gap
-            
-            relative_diff = (freq - closest) / reference_gap * 100  # Calcul de l'écart relatif
-            lines = ["Accordeur intégré", f"Fréquence: {freq:.2f} Hz", f"Note proche: {note}"]
+            self.lastfreq = freq
         else:
-            lines = ["Accordeur intégré", f"Fréquence: ∅ Hz", f"Note proche: ∅"]   
+            freq = self.lastfreq
+        closest_index = min(range(len(self.notes)), key=lambda i: abs(self.notes[i] - freq))  # Trouver l'index de la note la plus proche
+        closest = self.notes[closest_index]
+        note = self.note_labels[closest_index]
+            
+        # Calculer l'écart relatif en fonction de la moitié de la distance avec la note précédente ou suivante
+        if closest_index == 0:
+            reference_gap = (self.notes[1] - self.notes[0]) / 2
+        elif closest_index == len(self.notes) - 1:
+            reference_gap = (self.notes[-1] - self.notes[-2]) / 2
+        else:
+            lower_gap = (closest - self.notes[closest_index - 1]) / 2
+            upper_gap = (self.notes[closest_index + 1] - closest) / 2
+            reference_gap = lower_gap if freq < closest else upper_gap
+            
+        relative_diff = (freq - closest) / reference_gap * 100  # Calcul de l'écart relatif
+        lines = ["Accordeur intégré", f"Fréquence: {freq:.2f} Hz", f"Note proche: {note}"]
+        if self.lastfreq == 0:
+            lines = ["Accordeur intégré", f"Fréquence: // Hz", f"Note proche: //"]
             relative_diff = 0
-        y = HEIGHT * 0.6 - (len(lines) * self.font2.get_height()) // 2
+        y = HEIGHT * 0.55 - (len(lines) * self.font2.get_height()) // 2
         for line in lines:
             if line == lines[0]:
                 rendered_text = self.font.render(line, True, color)
@@ -67,25 +71,24 @@ class UI:
             else:
                 rendered_text = self.font2.render(line, True, color)
                 screen.blit(rendered_text, (WIDTH // 2 - rendered_text.get_width() // 2, y))
-                y += self.font2.get_height()
+                y += self.font2.get_height()  
+        # Dessiner la barre grise
+        bar_width = WIDTH // 2
+        bar_height = HEIGHT / 20
+        bar_x = (WIDTH - bar_width) // 2
+        bar_y = y + bar_height/2
+        pygame.draw.rect(screen, (186, 186, 186), (bar_x, bar_y, bar_width, bar_height))
             
-            # Dessiner la barre grise
-            bar_width = WIDTH // 4
-            bar_height = HEIGHT // 20
-            bar_x = (WIDTH - bar_width) // 2
-            bar_y = y + bar_height/2
-            pygame.draw.rect(screen, (186, 186, 186), (bar_x, bar_y, bar_width, bar_height))
-            
-            # Dessiner la barre verte
-            green_width = WIDTH // 20
-            green_x = (WIDTH - green_width) // 2
-            pygame.draw.rect(screen, (127, 221, 76), (green_x, bar_y, green_width, bar_height))
-            
-            # Dessiner le curseur rouge
-            cursor_width = 5
-            cursor_x = bar_x + (bar_width // 2) + (relative_diff / 100) * (bar_width // 2)
-            cursor_x = max(bar_x, min(cursor_x, bar_x + bar_width))  # Limite dans la barre
-            pygame.draw.rect(screen, (255, 0, 0), (cursor_x-cursor_width/2, bar_y - 10, cursor_width, bar_height + 20))
+        # Dessiner la barre verte
+        green_width = WIDTH // 20
+        green_x = (WIDTH - green_width) // 2
+        pygame.draw.rect(screen, (127, 221, 76), (green_x, bar_y, green_width, bar_height))
+        
+        # Dessiner le curseur rouge
+        cursor_width = 5
+        cursor_x = bar_x + (bar_width // 2) + (relative_diff / 100) * (bar_width // 2)
+        cursor_x = max(bar_x, min(cursor_x, bar_x + bar_width))  # Limite dans la barre
+        pygame.draw.rect(screen, (255, 0, 0), (cursor_x-cursor_width/2, bar_y - 10, cursor_width, bar_height + 20))
             
     
     def draw_score(self, screen, score, color=WHITE):
