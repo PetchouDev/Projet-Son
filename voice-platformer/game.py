@@ -10,7 +10,7 @@ from communicate.serialMonitor import SerialMonitor
 from visual.background import Background
 from visual.ui import UI
 from menus.pause import Pause
-
+import random
 # Initialisation de Pygame
 pygame.init()
 
@@ -59,9 +59,10 @@ class Game:
         for i in range(n):
             platform = generate_platforms(self.platforms[-1], self.speed)
             self.platforms.append(platform)
-            if len(self.enemies) < 5:
-                if platform.width > 1:
-                    self.enemies.append(generate_enemy(platform))
+            if random() < 0.6:
+                if len(self.enemies) < 6:
+                    if platform.width > 1:
+                        self.enemies.append(generate_enemy(platform))
 
     def handle_events(self):
         """Gestion des événements clavier et souris"""
@@ -181,6 +182,7 @@ class Game:
                 platform.draw(self.screen)
             self.ui.draw_score(self.screen, max(0, int(self.speed-SCROLL_SPEED*3+self.kills*10)))  # Afficher le score
             self.ui.loading_bar(self.screen, self.player.loading)
+            self.ui.freq_to_note(self.screen, self.power_charge, self.power_jump>self.calibrate)
         pygame.display.flip()
 
     def shoot(self):
