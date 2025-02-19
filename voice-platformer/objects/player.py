@@ -14,14 +14,14 @@ class Player:
         self.animate_timer = 0
         self.animate_index = 0
 
-        self.x = WIDTH // 4
+        self.x = WIDTH // 5
         self.y = HEIGHT - 100 - self.display_size[1]
 
         self.max_gain = 0
         self.loading = 0
         self.divide = 1000
         #self.jump = 0
-        self.PID = PID(0.04,0.05,0.05, 0, self.y)
+        self.PID = PID(0.03,0.04,0.04, 0, self.y)
         self.falling = True
         self.is_jumping = False
         self.starting_jump_y = 0

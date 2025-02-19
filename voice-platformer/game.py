@@ -69,7 +69,7 @@ class Game:
         keys = pygame.key.get_pressed()
         data = self.serial_reader.get_data()
         print(data)
-        self.power_jump = data["gain"]-self.calibrate
+        self.power_jump = (data["gain"]-self.calibrate)/1.5
         self.power_charge = data["frequency"]
         if (data["button_pressed_shoot"] or keys[pygame.K_z]) and  time() - self.shoot_wait:
             self.shoot()
@@ -82,10 +82,10 @@ class Game:
         if data["threshold"]:
             self.calibrate = data["threshold"]
         if keys[pygame.K_RETURN]:  # Appui sur Enter
-            if not self.game_started:  
-                self.game_started = True  # Démarrer le jeu
-            elif self.paused:
-                self.paused = False
+            if self.paused:  
+                self.paused = not self.paused  # Démarrer le jeu
+            elif self.game_started:
+                self.game_started = False
         if keys[pygame.K_SPACE]:
             self.power_jump = 10
         
