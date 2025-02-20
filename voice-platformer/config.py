@@ -10,7 +10,7 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 # --- Paramètres de physique ---
 GRAVITY = 7
 JUMP_FACTOR = 20
-CAP_GRAVITY = GRAVITY*10
+CAP_GRAVITY = GRAVITY*8
 
 SPAWN_JUMP= GRAVITY*JUMP_FACTOR*10
 SCROLL_SPEED = 8
@@ -22,7 +22,7 @@ BAUD_RATE = 115200
 # config.py - Fichier de configuration du jeu
 
 # --- Paramètres Vocaux ---
-THRESHOLD = 0  # Seuil pour la détection de la voix
+THRESHOLD = 2  # Seuil pour la détection de la voix
 
 # Couleurs
 WHITE = (255, 255, 255)

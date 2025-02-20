@@ -10,7 +10,7 @@ from communicate.serialMonitor import SerialMonitor
 from visual.background import Background
 from visual.ui import UI
 from menus.pause import Pause
-
+import random
 # Initialisation de Pygame
 pygame.init()
 
@@ -60,16 +60,17 @@ class Game:
         for i in range(n):
             platform = generate_platforms(self.platforms[-1], self.speed)
             self.platforms.append(platform)
-            if len(self.enemies) < 5:
-                if platform.width > 1:
-                    self.enemies.append(generate_enemy(platform))
+            if random() < 0.6:
+                if len(self.enemies) < 6:
+                    if platform.width > 1:
+                        self.enemies.append(generate_enemy(platform))
 
     def handle_events(self):
         """Gestion des événements clavier et souris"""
         keys = pygame.key.get_pressed()
         data = self.serial_reader.get_data()
         print(data)
-        self.power_jump = data["gain"]-self.calibrate
+        self.power_jump = (data["gain"]-self.calibrate)/1.5
         self.power_charge = data["frequency"]
         shoot = data["button_pressed_shoot"] or keys[pygame.K_z]
         pause = data["button_pressed_pause"] or keys[pygame.K_ESCAPE]
@@ -86,10 +87,10 @@ class Game:
         if data["threshold"]:
             self.calibrate = data["threshold"]
         if keys[pygame.K_RETURN]:  # Appui sur Enter
-            if not self.game_started:  
-                self.game_started = True  # Démarrer le jeu
-            elif self.paused:
-                self.paused = False
+            if self.paused:  
+                self.paused = not self.paused  # Démarrer le jeu
+            elif self.game_started:
+                self.game_started = False
         if keys[pygame.K_SPACE]:
             self.power_jump = 10
         
@@ -197,6 +198,7 @@ class Game:
             mouse_click = pygame.mouse.get_pressed()
             if quit_button_rect.collidepoint(mouse_pos) and mouse_click[0]:
                 self.running = False """
+            self.ui.freq_to_note(self.screen, self.power_charge, self.power_jump>self.calibrate)
         pygame.display.flip()
 
     def shoot(self):
