@@ -7,7 +7,7 @@ class UI:
         self.font2 = pygame.font.Font(font_path, 25)
 
     def draw_text(self, screen, text, color, y_offset=0):
-        lines = self.split_text(text, screen.get_width() - 40)  # Ajuste la largeur max
+        lines = self.split_text(text, WIDTH - 40)  # Ajuste la largeur max
         y = HEIGHT * 0.4 + y_offset - (len(lines) * self.font.get_height()) // 2
         for line in lines:
             rendered_text = self.font.render(line, True, color)
@@ -15,8 +15,8 @@ class UI:
             y += self.font.get_height()
     
     def draw_start_text(self, screen, text, score, color, y_offset=0):
-        lines = self.split_text(text, screen.get_width() - 40)  # Ajuste la largeur max
-        lines2 = self.split_text(score, screen.get_width() - 40)  # Ajuste la largeur max
+        lines = self.split_text(text, WIDTH - 40)  # Ajuste la largeur max
+        lines2 = self.split_text(score, WIDTH - 40)  # Ajuste la largeur max
         y = HEIGHT * 0.4 + y_offset - (len(lines) * self.font.get_height()) // 2
         for line in lines:
             rendered_text = self.font.render(line, True, color)
@@ -32,12 +32,41 @@ class UI:
     
     def draw_score(self, screen, score, color=WHITE):
         text = f"Score: {score}"
-        lines = self.split_text(text, screen.get_width() - 40)  # Ajuste la largeur max
+        lines = self.split_text(text, WIDTH - 40)  # Ajuste la largeur max
         y = HEIGHT * 0.02 - (len(lines) * self.font2.get_height()) // 2
         for line in lines:
             rendered_text = self.font2.render(line, True, color)
             screen.blit(rendered_text, (WIDTH*0.02, y))
             y += self.font2.get_height()
+    
+    """          
+    def draw_quit_button(self, screen):
+        pygame.draw.rect(screen, (255, 0, 0), (WIDTH*0.9, HEIGHT*0.9, WIDTH*0.1, HEIGHT*0.1))
+        text = self.font2.render("QUIT", True, (255, 255, 255))
+        screen.blit(text, (WIDTH*0.9 + 10, HEIGHT*0.9 + 10))
+        return pygame.Rect(WIDTH*0.9, HEIGHT*0.9, WIDTH*0.1, HEIGHT*0.1) """
+        
+    def draw_stat(self, screen, threshold, divider, input, color=WHITE):
+        text = f"Threshold: {threshold} dB"
+        text1 = f"Input: {input} dB"
+        text2 = f"Frequency Load: {round(1200/divider, 2)}"
+        lines = self.split_text(text, WIDTH - 40)  # Ajuste la largeur max
+        lines2 = self.split_text(text2, WIDTH - 40)  # Ajuste la largeur max
+        lines1 = self.split_text(text1, WIDTH - 40)  # Ajuste la largeur max
+        y = HEIGHT*0.98 - ((len(lines)+len(lines2)+len(lines1)) * self.font2.get_height())
+        for line in lines1:
+            rendered_text = self.font2.render(line, True, color)
+            screen.blit(rendered_text, (WIDTH*0.98 - rendered_text.get_width(), y))
+            y += self.font2.get_height()
+        for line in lines:
+            rendered_text = self.font2.render(line, True, color)
+            screen.blit(rendered_text, (WIDTH*0.98 - rendered_text.get_width(), y))
+            y += self.font2.get_height()
+        for line in lines2:
+            rendered_text = self.font2.render(line, True, color)
+            screen.blit(rendered_text, (WIDTH*0.98 - rendered_text.get_width(), y))
+            y += self.font2.get_height()
+
 
     def split_text(self, text, max_width):
         words = text.split(" ")
@@ -61,7 +90,7 @@ class UI:
         self.draw_start_text(screen, "SHOUT 2 PLAY", f"Best Score : {best_score}", WHITE)
     
     def draw_pause_menu(self, screen):
-        self.draw_text(screen, "PAUSE - Criez pour reprendre", WHITE)
+        self.draw_text(screen, "PAUSE", WHITE)
     
     def draw_game_over(self, screen, score):
         self.draw_text(screen, f"GAME OVER - Score: {score}", RED)

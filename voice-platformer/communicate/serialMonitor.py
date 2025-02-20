@@ -73,6 +73,7 @@ class SerialMonitor(threading.Thread):
     def stop(self):
         """Arrête le thread de lecture."""
         self.running = False
+        time.sleep(0.1)
         self.ser.close()
     
 def open_serial() -> SerialMonitor:
@@ -87,6 +88,9 @@ def open_serial() -> SerialMonitor:
 if __name__ == "__main__":
     monitor = open_serial()
     monitor.start()
+
+    while True:
+        time.sleep(1)
 
     input("Appuyez sur Entrée pour commencer la lecture...")
     times = []

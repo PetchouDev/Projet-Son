@@ -43,7 +43,8 @@ class Game:
         self.background = Background()
         self.ui = UI()
         self.pause = Pause()
-
+        self.last_state_shoot = 0
+        self.last_state_pause = 0
         # Autres paramètres
         self.enemy_spawn_timer = 0
         self.volume = 0
@@ -70,12 +71,16 @@ class Game:
         print(data)
         self.power_jump = data["gain"]-self.calibrate
         self.power_charge = data["frequency"]
-        if (data["button_pressed_shoot"] or keys[pygame.K_z]) and  time() - self.shoot_wait:
+        shoot = data["button_pressed_shoot"] or keys[pygame.K_z]
+        pause = data["button_pressed_pause"] or keys[pygame.K_ESCAPE]
+        if ((shoot and self.last_state_shoot != shoot)) and time() - self.shoot_wait and self.player.loading > 100 and not self.paused:  # 1 seconde entre chaque appui
             self.shoot()
             self.shoot_wait = time()
-        if (data["button_pressed_pause"] or keys[pygame.K_ESCAPE]) and time() - self.pause_wait > 1:  # 1 seconde entre chaque appui
+        self.last_state_shoot = shoot
+        if ((pause and self.last_state_pause != pause)) and time() - self.pause_wait > 1:  # 1 seconde entre chaque appui
             self.paused = not self.paused
             self.pause_wait = time()
+        self.last_state_pause = pause
         if data["divider"]:
             self.player.change_mode(data["divider"])
         if data["threshold"]:
@@ -95,7 +100,7 @@ class Game:
 
     def update_draw(self):
         """Mise à jour des objets du jeu"""
-        if not self.game_started:
+        if not self.game_started and not self.paused:
             self.background.update(self.screen, self.speed)
             self.player.draw(self.screen, self.speed)
             self.platforms[0].update(self.speed)
@@ -114,7 +119,7 @@ class Game:
             self.power_jump = 0
             self.background.update(self.screen, self.speed)
             
-            if self.player.y > HEIGHT*1.3:
+            if self.player.y > HEIGHT*1.4:
                 self.game_started = False
                 self.best_score = max(self.best_score, max(0, int(self.speed-SCROLL_SPEED*3+self.kills*10)))
                 self.kills = 0
@@ -175,12 +180,23 @@ class Game:
             self.ui.draw_score(self.screen, max(0, int(self.speed-SCROLL_SPEED*3+self.kills*10)))  # Afficher le score
             self.ui.loading_bar(self.screen, self.player.loading)
         elif self.paused: 
-
+            self.background.update(self.screen, 0)
             self.player.draw(self.screen, 0)
             for platform in self.platforms:
                 platform.draw(self.screen)
+            gray_surface = pygame.Surface(self.screen.get_size(), pygame.SRCALPHA)
+            gray_surface.fill((100, 100, 100, 100))  # Couleur grise semi-transparente
+            self.screen.blit(gray_surface, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
+            
             self.ui.draw_score(self.screen, max(0, int(self.speed-SCROLL_SPEED*3+self.kills*10)))  # Afficher le score
             self.ui.loading_bar(self.screen, self.player.loading)
+            self.ui.draw_stat(self.screen, int(self.calibrate), int(self.player.divide), int(self.power_jump + self.calibrate))
+            self.ui.draw_pause_menu(self.screen)  # Dessiner le menu pause
+            """ quit_button_rect = self.ui.draw_quit_button(self.screen)  # Dessiner le bouton quitter et obtenir son rectangle
+            mouse_pos = pygame.mouse.get_pos()
+            mouse_click = pygame.mouse.get_pressed()
+            if quit_button_rect.collidepoint(mouse_pos) and mouse_click[0]:
+                self.running = False """
         pygame.display.flip()
 
     def shoot(self):
@@ -203,6 +219,7 @@ class Game:
             self.update_draw()
             self.clock.tick(FPS)
         
+        print("Fermeture du jeu")
         self.serial_reader.stop()
         del self.serial_reader
         sys.exit()

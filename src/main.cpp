@@ -3,9 +3,10 @@
 
 
 // Définition des pins
-#define BUTTON_PIN_SHOOT 0
-#define BUTTON_PIN_PAUSE 1
-#define POTENTIOMETER_PIN 2
+#define BUTTON_PIN_SHOOT 9
+#define BUTTON_PIN_PAUSE 5
+#define POTENTIOMETER_DIVIDER 16
+#define POTENTIOMETER_THRESHOLD 17
 
 // Création des objets Audio pour Teensy 4.1
 AudioInputI2S        i2s1;
@@ -38,7 +39,7 @@ const float REFERENCE_PRESSURE = 0.00002; // 20 µPa = 0.00002 Pa (seuil d'audit
 const float SAMPLE_RATE = 44100.0;  // En Hz
 const int FFT_SIZE = 1024;          // Nombre de points FFT
 
-
+/* 
 void check_button() {
   bool currentShootState = digitalRead(BUTTON_PIN_SHOOT);
   bool currentPauseState = digitalRead(BUTTON_PIN_PAUSE);
@@ -74,11 +75,11 @@ void check_potentiometer_divider(){
 int potentiometer = analogRead(POTENTIOMETER_PIN);
 divider = 800 + (400 * potentiometer / 1023.0);
 Serial.println("{\"divider\":" + String(divider) + "}");
-}
+} */
 
 void setup() {
-    pinMode(BUTTON_PIN_SHOOT, INPUT_PULLUP);
-    pinMode(BUTTON_PIN_PAUSE, INPUT_PULLUP);
+    pinMode(BUTTON_PIN_SHOOT, INPUT_PULLDOWN);
+    pinMode(BUTTON_PIN_PAUSE, INPUT_PULLDOWN);
     AudioMemory(12); // Allouer de la mémoire audio
     Serial.begin(115200);
     audioShield.enable();
@@ -108,9 +109,19 @@ void loop() {
         float avgAmplitude = totalAmplitude / (FFT_SIZE / 2);
         float pressure = avgAmplitude / MIC_SENSITIVITY;  // Convertir en Pascals
         float dbSPL = 20.0 * log10(max(pressure, REFERENCE_PRESSURE) / REFERENCE_PRESSURE);
+
+        int divider = 800 + (400 * analogRead(POTENTIOMETER_DIVIDER) / 1023.0);
+        int threshold = 30 + (60 * analogRead(POTENTIOMETER_THRESHOLD) / 1023.0);
         
         // Création du message JSON
-        String message = "{\"gain\":" + String(dbSPL, 2) + ",\"frequency\":" + String(dominantFreq, 2) + "}";
+        String message = "{";
+        message += "\"gain\":" + String(dbSPL, 2);
+        message += ",\"frequency\":" + String(dominantFreq, 2);
+        message += ",\"button_pressed_shoot\":" + String(digitalRead(BUTTON_PIN_SHOOT));
+        message += ",\"button_pressed_pause\":" + String(digitalRead(BUTTON_PIN_PAUSE));
+        message += ",\"divider\":" + String(divider);
+        message += ",\"threshold\":" + String(threshold);
+        message += "}";
 
         // Conversion en tableau de char
         size_t msgLen = message.length();
@@ -125,11 +136,6 @@ void loop() {
         // Envoi du message
         Serial.println(b64Buffer);
     }
-
-    // ✅ 3. Envoyer les états des boutons et des potentiomètres
-    check_button();
-    check_potentiometer_threshold();
-    check_potentiometer_divider();
 
     delay(10);  // Petit délai pour éviter une surcharge de l'affichage
 }
