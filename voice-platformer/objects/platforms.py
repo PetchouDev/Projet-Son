@@ -10,7 +10,7 @@ class Platform:
         self.id = id
         self.width = width
 
-        self.sprite_sheet = pygame.image.load("voice-platformer/assets/platforms.png")
+        self.sprite_sheet = pygame.image.load("assets/platforms.png")
         self.sprite_sheet = pygame.transform.scale(self.sprite_sheet, (self.sprite_sheet.get_width() * 4, self.sprite_sheet.get_height() * 4))
         self.sprite_size = (64, 64)
         self.display_size = (TILE_SIZE, TILE_SIZE)

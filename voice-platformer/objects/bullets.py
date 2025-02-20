@@ -5,9 +5,9 @@ from config import *
 class Bullet:
     def __init__(self, x, y, speed=10):
         self.sprite_size = (64, 64)
-        self.egg_sheet = pygame.image.load("voice-platformer/assets/egg.png")
+        self.egg_sheet = pygame.image.load("assets/egg.png")
         self.egg_image = get_image(self, 0, 0, 64, self.egg_sheet)
-        self.touch_image_sheet = pygame.image.load("voice-platformer/assets/egg_cooked.png")
+        self.touch_image_sheet = pygame.image.load("assets/egg_cooked.png")
         self.touch_image = get_image(self, 0, 0, 192, self.touch_image_sheet)
 
         self.image = self.egg_image

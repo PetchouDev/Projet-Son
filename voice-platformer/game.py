@@ -11,6 +11,8 @@ from visual.background import Background
 from visual.ui import UI
 from menus.pause import Pause
 from random import random
+import tkinter as tk
+from tkinter import simpledialog
 # Initialisation de Pygame
 pygame.init()
 
@@ -26,7 +28,18 @@ class Game:
         self.game_started = False
         self.paused = False
         self.kills = 0
-        self.best_score = 0
+
+        # Meilleur score
+        save = open("highscores.txt", "r", encoding="utf-8")
+        scores = save.read()
+        user, score = scores.strip().split(":")
+        self.best_score = int(score)
+        self.best_user = user
+        save.close()
+        del save
+        del scores
+        del user
+        del score
 
         # Objets du jeu
         self.mode = False
@@ -107,7 +120,7 @@ class Game:
             self.platforms[0].update(self.speed)
             self.platforms[0].spawn_platform()
             self.platforms[0].draw(self.screen)
-            self.ui.draw_start_menu(self.screen, self.best_score)
+            self.ui.draw_start_menu(self.screen, self.best_score, self.best_user)
 
         if not self.paused and self.game_started:
             if self.speed < SCROLL_SPEED*3:
@@ -122,7 +135,18 @@ class Game:
             
             if self.player.y > HEIGHT*1.4:
                 self.game_started = False
-                self.best_score = max(self.best_score, max(0, int(self.speed-SCROLL_SPEED*3+self.kills*10)))
+                #self.best_score = max(self.best_score, max(0, ))
+                score = int(self.speed-SCROLL_SPEED*3+self.kills*10)
+                if score > self.best_score:
+                    self.best_score = score
+                    root = tk.Tk()
+                    root.withdraw()  # Hide the main window
+                    username = simpledialog.askstring("Shout 2 Play", "New best score!\nWhat is your name? ", parent=root)
+                    self.best_user = username
+                    root.destroy()
+
+                    with open("highscores.txt", "w", encoding="utf-8") as file:
+                        file.write(f"{username}: {score}\n")
                 self.kills = 0
                 self.player.reset()
                 self.enemies = []

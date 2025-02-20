@@ -1,8 +1,9 @@
 import pygame
 from config import *
 
+
 class UI:
-    def __init__(self, font_path="voice-platformer/assets/font.otf"):
+    def __init__(self, font_path="assets/font.otf"):
         self.font = pygame.font.Font(font_path, 40)
         self.font2 = pygame.font.Font(font_path, 25)
         self.note_names = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
@@ -147,8 +148,8 @@ class UI:
         
         return lines
     
-    def draw_start_menu(self, screen, best_score):
-        self.draw_start_text(screen, "SHOUT 2 PLAY", f"Best Score : {best_score}", WHITE)
+    def draw_start_menu(self, screen, best_score, best_user):
+        self.draw_start_text(screen, "SHOUT 2 PLAY", f"Best Score : {best_score} - {best_user}", WHITE)
     
     def draw_pause_menu(self, screen):
         self.draw_text(screen, "PAUSE", WHITE)

@@ -6,7 +6,7 @@ from core.utils import get_image
 
 class Enemy:
     def __init__(self, x, y):
-        self.sprite_sheet = pygame.image.load("voice-platformer/assets/ducky_enemy.png")
+        self.sprite_sheet = pygame.image.load("assets/ducky_enemy.png")
         self.sprite_sheet = pygame.transform.scale(self.sprite_sheet, (self.sprite_sheet.get_width() * 2, self.sprite_sheet.get_height() * 2))
         self.sprite_size = (64, 64)
         self.display_size = (192, 192)

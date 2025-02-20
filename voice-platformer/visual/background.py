@@ -19,7 +19,7 @@ class Background:
         
 class elements:
     def __init__(self, image, y_scale=(50, 200), speed=1):
-        self.picture = pygame.image.load(f"voice-platformer/assets/{image}.png")
+        self.picture = pygame.image.load(f"assets/{image}.png")
         self.picture = pygame.transform.scale(self.picture, (WIDTH // 6, HEIGHT // 6))
         self.position = [random.randint(WIDTH, WIDTH*2), random.randint(y_scale[0], y_scale[1])]
         self.y_scale = y_scale
@@ -39,7 +39,7 @@ class elements:
 
 class back_element:
     def __init__(self, image, speed=0.5):
-        self.picture = pygame.image.load(f"voice-platformer/assets/{image}.png")
+        self.picture = pygame.image.load(f"assets/{image}.png")
         self.picture = pygame.transform.scale(self.picture, (WIDTH, HEIGHT))
         self.position = [0, 0]
         self.speed = speed
