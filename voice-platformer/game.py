@@ -10,7 +10,7 @@ from communicate.serialMonitor import SerialMonitor
 from visual.background import Background
 from visual.ui import UI
 from menus.pause import Pause
-import random
+from random import random
 # Initialisation de Pygame
 pygame.init()
 
