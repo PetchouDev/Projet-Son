@@ -39,7 +39,7 @@ class UI:
             y += self.font2.get_height()
 
     def freq_to_note(self, screen, freq, active=False, color=WHITE):
-        if active:
+        if active and freq > 45:
             self.lastfreq = freq
         else:
             freq = self.lastfreq
@@ -59,7 +59,7 @@ class UI:
             
         relative_diff = (freq - closest) / reference_gap * 100  # Calcul de l'écart relatif
         lines = ["Accordeur intégré", f"Fréquence: {freq:.2f} Hz", f"Note proche: {note}"]
-        if self.lastfreq == 0:
+        if not active and self.lastfreq == 0:
             lines = ["Accordeur intégré", f"Fréquence: // Hz", f"Note proche: //"]
             relative_diff = 0
         y = HEIGHT * 0.55 - (len(lines) * self.font2.get_height()) // 2
@@ -172,3 +172,16 @@ class UI:
 
         text = self.font2.render(f"Munitions : {int(loading/100)}", True, (255, 255, 255))
         screen.blit(text, (x + bar_width + 10, y))
+
+if __name__ == "__main__":
+    pygame.init()
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    ui = UI()
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+        ui.freq_to_note(screen, 440, active=True)
+        pygame.display.flip()
+    pygame.quit()

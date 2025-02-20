@@ -69,7 +69,7 @@ class Game:
         """Gestion des événements clavier et souris"""
         keys = pygame.key.get_pressed()
         data = self.serial_reader.get_data()
-        print(data)
+        # print(data)
         self.power_jump = (data["gain"]-self.calibrate)/1.5
         self.power_charge = data["frequency"]
         shoot = data["button_pressed_shoot"] or keys[pygame.K_z]
@@ -198,7 +198,8 @@ class Game:
             mouse_click = pygame.mouse.get_pressed()
             if quit_button_rect.collidepoint(mouse_pos) and mouse_click[0]:
                 self.running = False """
-            self.ui.freq_to_note(self.screen, self.power_charge, self.power_jump>self.calibrate)
+            print(self.power_charge, self.power_jump, THRESHOLD, self.power_jump>THRESHOLD)
+            self.ui.freq_to_note(self.screen, self.power_charge, self.power_jump>THRESHOLD)
         pygame.display.flip()
 
     def shoot(self):
