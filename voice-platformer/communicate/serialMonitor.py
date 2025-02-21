@@ -40,7 +40,7 @@ class SerialMonitor(threading.Thread):
                     data = base64.b64decode(data).decode("utf-8")
                     # print(data)
                     data = json.loads(data)
-                    # print(data)
+                    print(data)
 
                     # Mise à jour des valeurs
                     self.process_data(data)

@@ -12,7 +12,6 @@
 AudioInputI2S        i2s1;
 AudioAnalyzeFFT1024  fft;
 AudioAnalyzePeak     peak;
-AudioAnalyzeNoteFrequency notefreq;
 AudioControlSGTL5000 audioShield;
 AudioConnection      patchCord1(i2s1, 0, fft, 0);
 AudioConnection      patchCord2(i2s1, 0, peak, 0);
@@ -86,18 +85,16 @@ void setup() {
     audioShield.enable();
     audioShield.inputSelect(AUDIO_INPUT_MIC); // S'assurer que le micro est bien sélectionné
     audioShield.micGain(20); // Ajuster le gain du micro
-    notefreq.begin(SAMPLE_RATE);
 }
 
 
 void loop() {
 
-    // Détecter la fréquence dominante avec FFT
-    if (fft.available() and notefreq.available()) {
+    // ✅ 2. Détecter la fréquence dominante avec FFT
+    if (fft.available()) {
         float totalAmplitude = 0.0;
         float maxAmplitude = 0.0;
-        //float dominantFreq = 0.0;
-        float dominantFreq = notefreq.read();
+        float dominantFreq = 0.0;
 
         for (int i = 0; i < (FFT_SIZE / 2); i++) {  // On ne prend que les fréquences utiles (0 - Nyquist)
             float magnitude = fft.read(i);
@@ -105,7 +102,7 @@ void loop() {
             
             if (magnitude > maxAmplitude) {
                 maxAmplitude = magnitude;
-                //dominantFreq = i * (SAMPLE_RATE / FFT_SIZE); // Convertir en Hz
+                dominantFreq = i * (SAMPLE_RATE / FFT_SIZE); // Convertir en Hz
             }
         }
 
