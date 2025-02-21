@@ -37,45 +37,7 @@ const float REFERENCE_PRESSURE = 0.00002; // 20 µPa = 0.00002 Pa (seuil d'audit
 
 // 📌 Fréquence d'échantillonnage et résolution FFT :
 const float SAMPLE_RATE = 44100.0;  // En Hz
-const int FFT_SIZE = 1024;          // Nombre de points FFT
-
-/* 
-void check_button() {
-  bool currentShootState = digitalRead(BUTTON_PIN_SHOOT);
-  bool currentPauseState = digitalRead(BUTTON_PIN_PAUSE);
-
-  if (lastShootState == HIGH && currentShootState == LOW) {
-      Serial.println("{\"button_pressed_shoot\":1}");
-  }
-  if (lastShootState == LOW && currentShootState == HIGH) {
-      Serial.println("{\"button_pressed_shoot\":0}");
-  }
-  
-  if (lastPauseState == HIGH && currentPauseState == LOW) {
-      Serial.println("{\"button_pressed_pause\":1}");
-  }
-  if (lastPauseState == LOW && currentPauseState == HIGH) {
-      Serial.println("{\"button_pressed_pause\":0}");
-  }
-  lastShootState = currentShootState;
-  lastPauseState = currentPauseState;
-}
-
-void send_serial(char *message){
-  Serial.println(message);
-}
-
-void check_potentiometer_threshold(){
-  int potentiometer = analogRead(POTENTIOMETER_PIN);
-  treshold = 40 + (20 * potentiometer / 1023.0);
-  Serial.println("{\"treshold\":" + String(treshold) + "}");
-}
-
-void check_potentiometer_divider(){
-int potentiometer = analogRead(POTENTIOMETER_PIN);
-divider = 800 + (400 * potentiometer / 1023.0);
-Serial.println("{\"divider\":" + String(divider) + "}");
-} */
+const int FFT_SIZE = 2048;          // Nombre de points FFT
 
 void setup() {
     pinMode(BUTTON_PIN_SHOOT, INPUT_PULLDOWN);
@@ -86,7 +48,6 @@ void setup() {
     audioShield.inputSelect(AUDIO_INPUT_MIC); // S'assurer que le micro est bien sélectionné
     audioShield.micGain(20); // Ajuster le gain du micro
 }
-
 
 void loop() {
 
