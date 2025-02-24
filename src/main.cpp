@@ -16,11 +16,8 @@ AudioControlSGTL5000 audioShield;
 AudioConnection      patchCord1(i2s1, 0, fft, 0);
 AudioConnection      patchCord2(i2s1, 0, peak, 0);
 
-
-
-float amplitude_max = 0.0;
-
 // Déclaration des variables
+float amplitude_max = 0.0;
 float divider = 1000; // en Hz
 float treshold = 0.5;
 int button_shoot = 0;
@@ -37,45 +34,7 @@ const float REFERENCE_PRESSURE = 0.00002; // 20 µPa = 0.00002 Pa (seuil d'audit
 
 // 📌 Fréquence d'échantillonnage et résolution FFT :
 const float SAMPLE_RATE = 44100.0;  // En Hz
-const int FFT_SIZE = 1024;          // Nombre de points FFT
-
-/* 
-void check_button() {
-  bool currentShootState = digitalRead(BUTTON_PIN_SHOOT);
-  bool currentPauseState = digitalRead(BUTTON_PIN_PAUSE);
-
-  if (lastShootState == HIGH && currentShootState == LOW) {
-      Serial.println("{\"button_pressed_shoot\":1}");
-  }
-  if (lastShootState == LOW && currentShootState == HIGH) {
-      Serial.println("{\"button_pressed_shoot\":0}");
-  }
-  
-  if (lastPauseState == HIGH && currentPauseState == LOW) {
-      Serial.println("{\"button_pressed_pause\":1}");
-  }
-  if (lastPauseState == LOW && currentPauseState == HIGH) {
-      Serial.println("{\"button_pressed_pause\":0}");
-  }
-  lastShootState = currentShootState;
-  lastPauseState = currentPauseState;
-}
-
-void send_serial(char *message){
-  Serial.println(message);
-}
-
-void check_potentiometer_threshold(){
-  int potentiometer = analogRead(POTENTIOMETER_PIN);
-  treshold = 40 + (20 * potentiometer / 1023.0);
-  Serial.println("{\"treshold\":" + String(treshold) + "}");
-}
-
-void check_potentiometer_divider(){
-int potentiometer = analogRead(POTENTIOMETER_PIN);
-divider = 800 + (400 * potentiometer / 1023.0);
-Serial.println("{\"divider\":" + String(divider) + "}");
-} */
+const int FFT_SIZE = 4096;          // Nombre de points FFT
 
 void setup() {
     pinMode(BUTTON_PIN_SHOOT, INPUT_PULLDOWN);
@@ -96,13 +55,22 @@ void loop() {
         float maxAmplitude = 0.0;
         float dominantFreq = 0.0;
 
-        for (int i = 0; i < (FFT_SIZE / 2); i++) {  // On ne prend que les fréquences utiles (0 - Nyquist)
+        for (int i = 1; i < (FFT_SIZE / 2) - 1; i++) {
             float magnitude = fft.read(i);
             totalAmplitude += magnitude;
-            
+
             if (magnitude > maxAmplitude) {
                 maxAmplitude = magnitude;
-                dominantFreq = i * (SAMPLE_RATE / FFT_SIZE); // Convertir en Hz
+                dominantFreq = i * (SAMPLE_RATE / FFT_SIZE);
+            }
+        }
+
+        if (dominantFreq > 0) {
+            float left = fft.read((int)(dominantFreq / (SAMPLE_RATE / FFT_SIZE)) - 1);
+            float right = fft.read((int)(dominantFreq / (SAMPLE_RATE / FFT_SIZE)) + 1);
+            if (right > left) {
+                float correction = (right - left) / (2 * (2 * maxAmplitude - left - right));
+                dominantFreq += correction * (SAMPLE_RATE / FFT_SIZE);
             }
         }
 
