@@ -5,6 +5,7 @@ import json
 import time
 #from config import *
 from queue import Queue
+from serial.tools import list_ports
 
 # --- Classe pour lire les données de Teensy ---
 class SerialMonitor(threading.Thread):
@@ -87,17 +88,39 @@ class SerialMonitor(threading.Thread):
         self.running = False
         time.sleep(0.1)
         self.ser.close()
-    
-def open_serial() -> SerialMonitor:
+
+
+def get_teensy_com_port():
+    """Renvoie la liste des ports série disponibles au format (PORT, DEVICE_NAME)."""
+    serial_items =  list_ports.comports()
+
+    for device in serial_items:
+        if "SER=9910160" in device.hwid:
+            return device.device
+
+    return None
+
+def open_serial(default_port:str="", baudrate:int=115200) -> SerialMonitor:
     """Ouvre une connexion série avec Teensy."""
     try:
-    
-        return SerialMonitor("COM13", 115200)
+        port = get_teensy_com_port()
+        if port is None:
+            port = default_port
+        if port is None:
+            raise Exception("Port série non trouvé")
+        
+        print(f"Ouverture du port série {port} a {baudrate}bps...")
+        
+        return SerialMonitor(port, baudrate)
 
     except Exception as e:
         print(f"Erreur lors de la recherche de ports série : {e}")
 
+
+
 if __name__ == "__main__":
+
+    print(get_teensy_com_port())
     monitor = open_serial()
     monitor.start()
 

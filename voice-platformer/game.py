@@ -6,7 +6,7 @@ from objects.player import Player
 from objects.platforms import Platform, generate_platforms
 from objects.bullets import Bullet, generate_bullet
 from objects.enemies import Enemy, generate_enemy
-from communicate.serialMonitor import SerialMonitor
+from communicate.serialMonitor import open_serial, SerialMonitor
 from visual.background import Background
 from visual.ui import UI
 from menus.pause import Pause
@@ -23,7 +23,7 @@ class Game:
         pygame.display.set_caption("Shout 2 Play")
         # Autres initialisations
         self.clock = pygame.time.Clock()
-        self.serial_reader = SerialMonitor(SERIAL_PORT, BAUD_RATE)
+        self.serial_reader: SerialMonitor = open_serial(SERIAL_PORT, BAUD_RATE)
         self.running = True
         self.game_started = False
         self.paused = False
