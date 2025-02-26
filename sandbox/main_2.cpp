@@ -1,6 +1,6 @@
 #include <Audio.h>
 #include "base64.hpp"
-#include <SD.h>
+
 
 // Définition des pins
 #define BUTTON_PIN_SHOOT 9
@@ -10,27 +10,19 @@
 #define SD_CS_PIN 10
 
 // Création des objets Audio pour Teensy 4.0
-AudioPlaySdWav       play_menu; 
-AudioPlaySdWav       play_background;
-AudioPlaySdWav       play_shoot;
-AudioPlaySdWav       play_die;
-
-AudioMixer4          mixer; 
-
+AudioPlaySdWav       play_menu, play_background, play_shoot, play_die;
 AudioInputI2S        i2s1;
-AudioOutputI2S       i2s2;
 AudioAnalyzeFFT1024  fft;
-
 AudioControlSGTL5000 audioShield;
 AudioConnection      patchCord1(i2s1, 0, fft, 0);
-
-AudioConnection      patchCord2(play_background, 0, mixer, 0);
-AudioConnection      patchCord4(play_shoot, 0, mixer, 1);
-AudioConnection      patchCord6(play_die, 0, mixer, 2);
-AudioConnection      patchCord8(play_menu, 0, mixer, 3);
-
-AudioConnection      patchCord10(mixer, 0, i2s2, 0);
-AudioConnection      patchCord11(mixer, 0, i2s2, 1);
+AudioConnection      patchCord2(play_background, 0, audioShield, 0);
+AudioConnection      patchCord3(play_background, 1, audioShield, 1);
+AudioConnection      patchCord4(play_shoot, 0, audioShield, 0);
+AudioConnection      patchCord5(play_shoot, 1, audioShield, 1);
+AudioConnection      patchCord6(play_die, 0, audioShield, 0);
+AudioConnection      patchCord7(play_die, 1, audioShield, 1);
+AudioConnection      patchCord8(play_menu, 0, audioShield, 0);
+AudioConnection      patchCord9(play_menu, 1, audioShield, 1);
 
 // Déclaration des paramètres de traitement
 float amplitude_max = 0.0;
@@ -43,7 +35,6 @@ int potentiometer_divider = 0;
 
 // Variables pour la gestion de la musique
 bool was_playing = false;
-bool is_paused   = false;
 
 // Variables pour test d'états 
 bool lastShootState = HIGH;
@@ -59,104 +50,62 @@ const int FFT_SIZE = 1024;          // Nombre de points FFT
 void setup() {
     pinMode(BUTTON_PIN_SHOOT, INPUT_PULLDOWN);
     pinMode(BUTTON_PIN_PAUSE, INPUT_PULLDOWN);
-    AudioMemory(40); // Allouer de la mémoire audio
+    AudioMemory(12); // Allouer de la mémoire audio
     Serial.begin(115200);
     audioShield.enable();
     audioShield.inputSelect(AUDIO_INPUT_MIC); // S'assurer que le micro est bien sélectionné
-    audioShield.volume(0.8); // Ajuster le volume
     audioShield.micGain(20); // Ajuster le gain du micro
     if (!SD.begin(SD_CS_PIN)) {
         Serial.println("SD card initialization failed!");
         return;
     }
-    mixer.gain(0, 1.0);
-    mixer.gain(1, 1.0);
-    mixer.gain(2, 1.0);
-    mixer.gain(3, 1.0);
     Serial.println("SD card initialized.");
 }
 
-void playAudio(String filename_str) {
-
-    const char* filename = filename_str.c_str();
-
-    if (filename_str == "init") {
-        // Stopper tous les sons
-        play_menu.stop();
-        play_background.stop();
-        play_shoot.stop();
-        play_die.stop();
-
-        was_playing = false;
-
-        delay(10);
-
-        // Jouer le son de démarrage
-        play_menu.play("main_menu.wav");
-
-        Serial.println("Playing main_menu.wav");
-
-    } if (filename_str == "shoot.wav") {
-        /* if (play_shoot.isPlaying()) {
+void playAudio(const char* filename) {
+    
+    if (filename == "shoot.wav") {
+        if (play_shoot.isPlaying()) {
             play_shoot.stop();
-        } */
+        }
         play_shoot.play(filename);
-        Serial.println("Playing shoot.wav");
-    } else if (filename_str == "die.wav") {
-        /* if (!play_die.isPlaying()) {
+    } else if (filename == "die.wav") {
+        if (play_die.isPlaying()) {
             play_die.stop();
-        } */
+        }
         play_die.play(filename);
-        Serial.println("Playing die.wav");
-    } /* else if (filename_str == "main_menu.wav") {
+    } else if (filename == "main_menu.wav") {
         if (play_menu.isPlaying()) {
             play_menu.stop();
         }
-        play_background.play(filename);
-        was_playing = false;
-    } else if (filename_str == "shout2play.wav") {
         if (play_background.isPlaying()) {
             play_background.stop();
+        }
+        play_menu.play(filename);
+        was_playing = false;
+    } else if (filename == "shout2play.wav") {
+        if (play_background.isPlaying()) {
+            play_background.stop();
+        }
+        if (play_menu.isPlaying()) {
+            play_menu.stop();
         }
         play_background.play(filename);
         was_playing = true;
-    } */ else if(filename_str == "pause"){
+    } else if(filename == "pause"){
         if (play_background.isPlaying()) {
             play_background.togglePlayPause();
-            was_playing = true;
-            Serial.println("Pausing background music");
+        }
+        if(wasplaying){
             play_menu.play("main_menu.wav");
-            Serial.println("Playing main_menu.wav");
         }
-        /* if(was_playing){
-            play_menu.play("main_menu.wav");
-        } */
-    } else if(filename_str == "resume"){
+    } else if(filename == "resume"){
         if (play_menu.isPlaying()) {
-            play_menu.stop();
-            Serial.println("Stopping main_menu.wav");
+            if(was_playing){
+                play_menu.stop();
+                play_background.togglePlayPause();
+            }
         }
-        if(was_playing){
-            play_background.togglePlayPause();
-            Serial.println("Resuming background music");
-
-        } else {
-            play_background.play("shout2play.wav");
-            Serial.println("Playing shout2play.wav");
-        }
-
-        was_playing = false;
-    } else if (filename_str == "stop") {
-        if (play_background.isPlaying()) {
-            play_background.stop();
-            Serial.println("Stopping background music");
-        }
-        if (play_menu.isPlaying()) {
-            play_menu.stop();
-            Serial.println("Stopping main_menu.wav");
-        }
-
-        was_playing = false;
     }
 }
 
@@ -228,3 +177,5 @@ void loop() {
 
     delay(10);  // Petit délai pour éviter une surcharge de l'affichage
 }
+
+

@@ -19,7 +19,6 @@ TILE_SIZE = 128
 # --- Serial (Teensy) ---
 SERIAL_PORT = "COM13"  # À ajuster
 BAUD_RATE = 115200
-# config.py - Fichier de configuration du jeu
 
 # --- Paramètres Vocaux ---
 THRESHOLD = 2  # Seuil pour la détection de la voix

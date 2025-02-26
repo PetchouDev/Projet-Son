@@ -59,9 +59,9 @@ class UI:
             reference_gap = lower_gap if freq < closest else upper_gap
             
         relative_diff = (freq - closest) / reference_gap * 100  # Calcul de l'écart relatif
-        lines = ["Accordeur intégré", f"Fréquence: {freq:.2f} Hz", f"Note proche: {note}"]
+        lines = ["Coin-coin mètre", f"Fréquence: {freq:.2f} Hz", f"Note proche: {note}"]
         if not active and self.lastfreq == 0:
-            lines = ["Accordeur intégré", f"Fréquence: // Hz", f"Note proche: //"]
+            lines = ["Coin-coin mètre", f"Fréquence: // Hz", f"Note proche: //"]
             relative_diff = 0
         y = HEIGHT * 0.55 - (len(lines) * self.font2.get_height()) // 2
         for line in lines:

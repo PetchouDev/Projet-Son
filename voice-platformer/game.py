@@ -93,6 +93,10 @@ class Game:
         self.last_state_shoot = shoot
         if ((pause and self.last_state_pause != pause)) and time() - self.pause_wait > 1:  # 1 seconde entre chaque appui
             self.paused = not self.paused
+            if self.paused:
+                self.serial_reader.send("pause")
+            else:
+                self.serial_reader.send("resume")
             self.pause_wait = time()
         self.last_state_pause = pause
         if data["divider"]:
@@ -135,6 +139,7 @@ class Game:
             
             if self.player.y > HEIGHT*1.4:
                 self.game_started = False
+                self.serial_reader.send("init")
                 #self.best_score = max(self.best_score, max(0, ))
                 score = int(self.speed-SCROLL_SPEED*3+self.kills*10)
                 if score > self.best_score:
@@ -189,6 +194,7 @@ class Game:
                     self.bullets.remove(died_from)
                     self.touched_bullets.append(died_from) # Afficher l'oeuf au plat au 1er plan
                     self.kills += 1
+                    self.serial_reader.send("die.wav")
                     continue
                 enemy.draw(self.screen, self.speed)
                 #pygame.draw.line(self.screen, (255, 0, 0),( WIDTH//2, HEIGHT), (enemy.x, enemy.y), 2)
@@ -222,17 +228,21 @@ class Game:
             mouse_click = pygame.mouse.get_pressed()
             if quit_button_rect.collidepoint(mouse_pos) and mouse_click[0]:
                 self.running = False """
-            print(self.power_charge, self.power_jump, THRESHOLD, self.power_jump>THRESHOLD)
+            # print(self.power_charge, self.power_jump, THRESHOLD, self.power_jump>THRESHOLD)
             self.ui.freq_to_note(self.screen, self.power_charge, self.power_jump>THRESHOLD)
         pygame.display.flip()
 
     def shoot(self):
         self.bullets.append(Bullet(self.player.x, self.player.y, self.speed))
         self.player.loading = max(self.player.loading-100, 0)
+        self.serial_reader.send("shoot.wav")
         
     def run(self):
         """Boucle principale du jeu"""
         self.serial_reader.start()
+
+        self.serial_reader.send("init")
+
         while self.running:
 
             self.handle_events()
@@ -240,6 +250,7 @@ class Game:
             if self.power_jump >= THRESHOLD:
                 if not self.game_started:
                     self.game_started = True
+                    self.serial_reader.send("resume")
                     if self.loose == 1:
                         self.power_jump = 10
                         self.speed = SCROLL_SPEED
@@ -247,6 +258,7 @@ class Game:
             self.clock.tick(FPS)
         
         print("Fermeture du jeu")
+        self.serial_reader.send("stop")
         self.serial_reader.stop()
         del self.serial_reader
         sys.exit()

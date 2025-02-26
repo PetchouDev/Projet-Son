@@ -36,14 +36,17 @@ class SerialMonitor(threading.Thread):
                 # Lecture des données de Teensy
                 data = self.ser.readline().decode("utf-8").strip()
                 if data:
-                    # print(data)
-                    data = base64.b64decode(data).decode("utf-8")
-                    # print(data)
-                    data = json.loads(data)
-                    print(data)
+                    try:
+                        # print(data)
+                        data = base64.b64decode(data).decode("utf-8")
+                        # print(data)
+                        data = json.loads(data)
+                        # print(data)
 
-                    # Mise à jour des valeurs
-                    self.process_data(data)
+                        # Mise à jour des valeurs
+                        self.process_data(data)
+                    except Exception as e:
+                        print(f"> {data}") # SI pas de json encodé en base64, on le log
 
             except Exception as e:
                 print(f"Erreur lors de la lecture des données : {e}")
@@ -70,6 +73,15 @@ class SerialMonitor(threading.Thread):
             "threshold": self.threshold
         }
     
+    def send(self, message: str) -> None:
+        """Envoie un message au Teensy."""
+        try:
+            print("Sending \"" + message + "\" to Teensy")
+            message += "\n"
+            self.ser.write(message.encode("utf-8"))
+        except Exception as e:
+            print(f"Erreur lors de l'envoi du message à Teensy : {e}")
+    
     def stop(self):
         """Arrête le thread de lecture."""
         self.running = False
@@ -90,7 +102,8 @@ if __name__ == "__main__":
     monitor.start()
 
     while True:
-        time.sleep(1)
+        monitor.send(input("> "))
+        time.sleep(0.1)
 
     input("Appuyez sur Entrée pour commencer la lecture...")
     times = []
