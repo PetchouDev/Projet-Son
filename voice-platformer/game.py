@@ -80,6 +80,9 @@ class Game:
 
     def handle_events(self):
         """Gestion des événements clavier et souris"""
+        if pygame.event.get(pygame.QUIT):
+            self.running = False
+            return
         keys = pygame.key.get_pressed()
         data = self.serial_reader.get_data()
         # print(data)
@@ -256,7 +259,13 @@ class Game:
                         self.speed = SCROLL_SPEED
             self.update_draw()
             self.clock.tick(FPS)
-        
+
+
+        self.stop()
+
+    
+    def stop(self):
+        """Arrête le jeu"""
         print("Fermeture du jeu")
         self.serial_reader.send("stop")
         self.serial_reader.stop()
