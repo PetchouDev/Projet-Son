@@ -12,11 +12,10 @@ class SerialMonitor(threading.Thread):
     def __init__(self, serial_port, baud_rate):
         """Initialise la connexion série pour lire les données de Teensy."""
 
-        # Initialisation de la connexion série
-        threading.Thread.__init__(self)
+        super().__init__()
         self.ser = serial.Serial(serial_port, baud_rate, timeout=0.1)
+        self.stop_event = threading.Event()
         self.queue = Queue()
-        self.running = True
 
         # Variables pour stocker les données
         self.gain = 0
@@ -31,27 +30,24 @@ class SerialMonitor(threading.Thread):
         super().start()
 
     def run(self):
-        self.running = True
-        while self.running:
+        """Boucle de lecture des données de Teensy."""
+        while not self.stop_event.is_set():
             try:
-                # Lecture des données de Teensy
-                data = self.ser.readline().decode("utf-8").strip()
-                if data:
-                    try:
-                        # print(data)
-                        data = base64.b64decode(data).decode("utf-8")
-                        # print(data)
-                        data = json.loads(data)
-                        # print(data)
-
-                        # Mise à jour des valeurs
-                        self.process_data(data)
-                    except Exception as e:
-                        print(f"> {data}") # SI pas de json encodé en base64, on le log
+                if self.ser.in_waiting > 0:
+                    data = self.ser.readline().decode("utf-8").strip()
+                    if data:
+                        try:
+                            data = base64.b64decode(data).decode("utf-8")
+                            data = json.loads(data)
+                            self.process_data(data)
+                        except Exception:
+                            print(f"> {data}")  # Log si non JSON
+                else:
+                    time.sleep(0.1)  # Pause pour éviter de tourner à vide
 
             except Exception as e:
-                print(f"Erreur lors de la lecture des données : {e}")
-                self.running = False
+                print(f"Erreur de lecture série : {e}")
+                break
 
     def process_data(self, data):
         """Parse les données JSON et met à jour les valeurs."""
@@ -82,12 +78,14 @@ class SerialMonitor(threading.Thread):
             self.ser.write(message.encode("utf-8"))
         except Exception as e:
             print(f"Erreur lors de l'envoi du message à Teensy : {e}")
-    
+
     def stop(self):
-        """Arrête le thread de lecture."""
-        self.running = False
-        time.sleep(0.1)
-        self.ser.close()
+        """Arrête proprement le thread."""
+        if self.is_alive():
+            self.stop_event.set()  # Déclenche l'arrêt
+            self.join()  # Attend la fin du thread
+        self.ser.close()  # Ferme le port série
+        print("Connexion série fermée.")
 
 
 def get_teensy_com_port():

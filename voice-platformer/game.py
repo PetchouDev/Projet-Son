@@ -82,6 +82,7 @@ class Game:
         """Gestion des événements clavier et souris"""
         if pygame.event.get(pygame.QUIT):
             self.running = False
+            self.stop()
             return
         keys = pygame.key.get_pressed()
         data = self.serial_reader.get_data()
