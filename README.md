@@ -1,40 +1,56 @@
-https://docs.platformio.org/en/latest/platforms/teensy.html
-https://inria-emeraude.github.io/son/
-https://github.com/inria-emeraude/son
+# Shout2Play
 
-TEENSY : 
-1. Enregistrer du son en direct
-    1. Echantillonner
-2. Convertir un son en vecteur (puissance, fréquence)
-3. Enregistrer consigne bouton
-4. Enregistrer consigne potentiometre
+## Introduction
 
-PYTHON : 
-1. Pygame création fenêtre
-2. Physique sol, personnages
-    1. Mouvements généraux
-3. Menu start, menu pause, score
-    1. Distance parcourue +kills = score
-    2. Pause = appui bouton
-    3. Switch mode women (menu pause ou start)
-4. Fonction de tir
-    1. Barre de charge
-    2. Balle (vitesse)
-    3. Kill/Destroy
-5. Affichage sprites (perso, fond, ennemis, balle)
-    1. Fond + nuage aléatoire + montagnes
-    2. Mouvement perspectives
-6. Musique de fond
-    1. Réglage volume par consigne potentiomètre
-    2. Envoi consignes de play soundboard on event
+Ce dépôt constitue notre proposition pour le projet SON dans le cadre de notre formation en 3ème année à l’INSA Lyon, au sein du département Télécommunications, Services & Usages. 
 
-FONCTIONNEMENT MOUVEMENT : 
-Voix -> gain ==> DGAIN = gain_voix-gain_voix_recorded_max   >0
-Y_vector = DGAIN x facteur_puissance - GRAVITY x TIME_IN_AIR
-LOAD += Voix -> freq/5(ou+)(+1 mode femme)
-Vitesse défilement (potentiometre)
+Shout2Play est un jeu de plateforme de type runner, dans lequel le joueur incarne un canard et doit crier afin de le faire progresser dans un monde généré aléatoirement. 
+
+Nous avons fait de notre mieux pour proposer au joueur une expérience à la fois ludique et scientifique, tout en mettant à profit les savoir-faire acquis lors de notre formation. 
+
+## Contenu du dépôt
+
+Ce dépôt est divisé en deux parties principales :
+- `src`: le code embarqué sur le Teensy
+- `Shout2Play`: le code du jeu (basé sur Python3 et PyGame)
+
+Ainsi que de `lib` et `include`, qui rassemblent les dépendances du programme embarqué.
+
+## Vidéo démonstrative
+
+<iframe width="681" height="511" src="https://www.youtube.com/embed/QVXOtM6kn_g" title="Shout2Play - Hurler, c’est gagner ! - Présentation du projet SON par @nocturios et @petchoudev" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+Si la vidéo ne s'affiche pas, elle reste disponible [ici](https://www.youtube.com/watch?v=QVXOtM6kn_g)
+
+## Comment jouer ?
+
+1. Réaliser le montage suivant sur le bloc Teensy + AudioShield
+
+![](assets/shout2play.drawio.svg)
+
+2. Brancher microphone et casque audio sur les ports prévus à cet effet (peut requérir de souder le port microphone).
+
+3. Cloner ce repo et l'ouvrir dans VS Code
+4. Télécharger l'extension PlatformIO et l'Arduino IDE et ajouter le manifeste [TeensyDuino](https://www.pjrc.com/teensy/td_download.html)
+5. Compiler et uploader le projet vers la carte (PlatformIO devrait la détecter automatiquement)
+6. Installer les dépendances python `pip install -r requirements.txt`
+7. Executer le script `python3 Shout2Play/main.py`
+8. Crier
+
+## Extras
+
+- [Poster scientifique du projet](assets/Shout%202%20Play%20V2.pdf)
+- [BO du jeu](assets/Shout2Play.wav)
+
+## Remerciements
+
+Merci à :
+- Romain Michon, pour son cours et son support tout au long du projet
+- Toute l'équipe pédagogique, pour leur aide et leurs précieux conseils
+- Lise et Amina, pour leur aide pour la lecture de médias (et leur patience)
+- La classe de 3TCA, pour le climat d'entraide et la bonne humeur au quotidien
+  
 
 
-
-Homme : ≈ 80 Hz (basse) à 1 100 Hz (~C6, ténor aigu)
-Femme : ≈ 165 Hz (alto) à 1 300 Hz (~E6, soprano aigu)
+<br><br>
+> Willam et Mathéo

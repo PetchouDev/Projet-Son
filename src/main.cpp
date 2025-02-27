@@ -63,16 +63,16 @@ void setup() {
     Serial.begin(115200);
     audioShield.enable();
     audioShield.inputSelect(AUDIO_INPUT_MIC); // S'assurer que le micro est bien sélectionné
-    audioShield.volume(0.8); // Ajuster le volume
+    audioShield.volume(0.6); // Ajuster le volume
     audioShield.micGain(20); // Ajuster le gain du micro
     if (!SD.begin(SD_CS_PIN)) {
         Serial.println("SD card initialization failed!");
         return;
     }
-    mixer.gain(0, 1.0);
+    mixer.gain(0, 0.5);
     mixer.gain(1, 1.0);
     mixer.gain(2, 1.0);
-    mixer.gain(3, 1.0);
+    mixer.gain(3, 0.5);
     Serial.println("SD card initialized.");
 }
 
