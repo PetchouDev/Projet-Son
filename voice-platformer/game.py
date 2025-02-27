@@ -252,7 +252,7 @@ class Game:
             self.handle_events()
 
             if self.power_jump >= THRESHOLD:
-                if not self.game_started:
+                if not self.game_started and not self.paused:
                     self.game_started = True
                     self.serial_reader.send("resume")
                     if self.loose == 1:
