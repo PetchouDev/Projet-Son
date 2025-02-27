@@ -18,7 +18,8 @@ Ainsi que de `lib` et `include`, qui rassemblent les dépendances du programme e
 
 ## Vidéo démonstrative
 
-<iframe width="681" height="511" src="https://www.youtube.com/embed/QVXOtM6kn_g" title="Shout2Play - Hurler, c’est gagner ! - Présentation du projet SON par @nocturios et @petchoudev" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+[![Shout2Play demo video](https://img.youtube.com/vi/QVXOtM6kn_g/0.jpg)](https://www.youtube.com/watch?v=QVXOtM6kn_g)
+
 
 Si la vidéo ne s'affiche pas, elle reste disponible [ici](https://www.youtube.com/watch?v=QVXOtM6kn_g)
 
